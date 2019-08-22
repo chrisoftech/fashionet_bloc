@@ -1,4 +1,5 @@
 import 'package:fashionet_bloc/consts/consts.dart';
+import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -105,11 +106,16 @@ class _AuthPageState extends State<AuthPage> {
           );
   }
 
+  void submitForm() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (BuildContext context) => ProfileFormPage()));
+  }
+
   Widget _buildActionButton() {
     return Align(
       alignment: Alignment.bottomRight,
       child: RaisedButton(
-        onPressed: () {},
+        onPressed: () => submitForm(),
         color: Theme.of(context).accentColor,
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
