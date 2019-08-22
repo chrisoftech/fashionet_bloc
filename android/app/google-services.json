@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "981937671384",
+    "firebase_url": "https://fashionet-bloc.firebaseio.com",
+    "project_id": "fashionet-bloc",
+    "storage_bucket": "fashionet-bloc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:981937671384:android:e5b25e5cbbdc8266",
+        "android_client_info": {
+          "package_name": "com.example.fashionet_bloc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "981937671384-v3plu9do5l6o40lk2ghnkhp89kkl9mdf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fashionet_bloc",
+            "certificate_hash": "a46e2d2c055d2838c31c09e0e395b01fa5da96f3"
+          }
+        },
+        {
+          "client_id": "981937671384-2qce6pn6h3u81bqpifb689i5ck0riahl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn50rKHMxoM8XTPtnuyy_c7Bflzyiaquc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "981937671384-2qce6pn6h3u81bqpifb689i5ck0riahl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
