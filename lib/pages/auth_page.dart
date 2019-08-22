@@ -1,5 +1,8 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,10 +17,12 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   TapGestureRecognizer _tapGestureRecognizer;
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   AuthMode _authMode = AuthMode.Login;
-
   CountryCode _selectedCountryCode;
+
+  AuthBloc _authBloc;
 
   @override
   void initState() {
@@ -27,8 +32,15 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authBloc = AuthProvider.of(context);
+  }
+
+  @override
   void dispose() {
     _tapGestureRecognizer.dispose();
+    _authBloc.dispose();
     super.dispose();
   }
 
@@ -60,83 +72,146 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 
-  Widget _buildPhoneNumberTextField() {
-    return Row(
-      children: <Widget>[
-        CountryCodePicker(
-          onChanged: (CountryCode countryCode) {
-            _selectedCountryCode = countryCode;
-          },
-          initialSelection: '+233',
-          favorite: ['+233'],
-          showCountryOnly: false,
-          // padding: EdgeInsets.only(top: 15.0),
-          padding: EdgeInsets.only(top: 3.0, right: 2.0),
-          textStyle: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontSize: 17.0,
-              fontWeight: FontWeight.bold),
-        ),
-        Flexible(
-          child: TextField(
-            keyboardType: TextInputType.phone,
-            style: TextStyles.textFieldTextStyle,
-            decoration: InputDecoration(hintText: 'Enter Phone number'),
-          ),
-        ),
-      ],
-    );
+  Widget _buildEmailTextField() {
+    return StreamBuilder<String>(
+        stream: _authBloc.email,
+        builder: (context, snapshot) {
+          return Row(
+            children: <Widget>[
+              // CountryCodePicker(
+              //   onChanged: (CountryCode countryCode) {
+              //     _selectedCountryCode = countryCode;
+              //   },
+              //   initialSelection: '+233',
+              //   favorite: ['+233'],
+              //   showCountryOnly: false,
+              //   padding: EdgeInsets.only(
+              //       top: snapshot.error == null ? 3.0 : 0.0,
+              //       bottom: snapshot.error == null ? 0.0 : 15.0,
+              //       right: 2.0),
+              //   textStyle: TextStyle(
+              //       color: Theme.of(context).primaryColor,
+              //       fontSize: 17.0,
+              //       fontWeight: FontWeight.bold),
+              // ),
+              Flexible(
+                child: TextField(
+                  onChanged: _authBloc.onEmailChanged,
+                  keyboardType: TextInputType.emailAddress,
+                  style: TextStyles.textFieldTextStyle,
+                  decoration: InputDecoration(
+                      labelText: 'Email', errorText: snapshot.error),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   Widget _buildPasswordTextField() {
-    return TextField(
-      obscureText: true,
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Password'),
-    );
+    return StreamBuilder<String>(
+        stream: _authBloc.password,
+        builder: (context, snapshot) {
+          return TextField(
+            obscureText: true,
+            onChanged: _authBloc.onPasswordChanged,
+            style: TextStyles.textFieldTextStyle,
+            decoration: InputDecoration(
+                labelText: 'Password', errorText: snapshot.error),
+          );
+        });
   }
 
   Widget _buildPasswordConfirmTextField() {
     return _authMode == AuthMode.Login
         ? Container()
-        : TextField(
-            obscureText: true,
-            style: TextStyles.textFieldTextStyle,
-            decoration: InputDecoration(labelText: 'Confirm Password'),
-          );
+        : StreamBuilder<String>(
+            stream: _authBloc.confirmPassword,
+            builder: (context, snapshot) {
+              return TextField(
+                obscureText: true,
+                onChanged: _authBloc.onPasswordConfirmChanged,
+                style: TextStyles.textFieldTextStyle,
+                decoration: InputDecoration(
+                    labelText: 'Confirm Password', errorText: snapshot.error),
+              );
+            });
   }
 
-  void submitForm() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (BuildContext context) => ProfileFormPage()));
+  void _showSnackbar({@required String message}) {
+    final snackbar = SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(child: Text(message)),
+            Icon(Icons.info_outline, color: Theme.of(context).accentColor)
+          ],
+        ),
+        duration: new Duration(seconds: 2));
+    _scaffoldKey.currentState
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackbar);
+  }
+
+  void submitForm() async {
+    final ReturnType _isAuthenticated = _authMode == AuthMode.Login
+        ? await _authBloc.signInUser()
+        : await _authBloc.signUpUser();
+
+    if (!_isAuthenticated.returnType) {
+      _showSnackbar(message: _isAuthenticated.messagTag);
+    }
   }
 
   Widget _buildActionButton() {
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: RaisedButton(
-        onPressed: () => submitForm(),
-        color: Theme.of(context).accentColor,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(_authMode == AuthMode.Login ? 'Login' : 'Sign Up',
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold)),
-              SizedBox(width: 20.0),
-              Icon(Icons.arrow_forward_ios,
-                  size: 18.0, color: Theme.of(context).primaryColor)
-            ],
-          ),
-        ),
-      ),
-    );
+    return StreamBuilder<bool>(
+        stream: _authMode == AuthMode.Login
+            ? _authBloc.validateSignIn
+            : _authBloc.validateSignUp,
+        builder: (context, AsyncSnapshot<bool> validatorSnapshot) {
+          return StreamBuilder<LoginState>(
+              stream: _authBloc.loginState,
+              builder: (context, snapshot) {
+                return Align(
+                  alignment: Alignment.bottomRight,
+                  child: RaisedButton(
+                    onPressed: (validatorSnapshot.hasData &&
+                            validatorSnapshot.data &&
+                            snapshot.data != LoginState.Loading)
+                        ? () => submitForm()
+                        : null,
+                    color: Theme.of(context).accentColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                              _authMode == AuthMode.Login ? 'Login' : 'Sign Up',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold)),
+                          SizedBox(width: 20.0),
+                          snapshot.data == LoginState.Loading
+                              ? SizedBox(
+                                  height: 20.0,
+                                  width: 20.0,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.0),
+                                )
+                              : Icon(Icons.arrow_forward_ios,
+                                  size: 18.0,
+                                  color: Theme.of(context).primaryColor)
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              });
+        });
   }
 
   Widget _buildAuthModeSwitcher() {
@@ -163,8 +238,8 @@ class _AuthPageState extends State<AuthPage> {
       children: <Widget>[
         _buildFormTitle(),
         SizedBox(height: 30.0),
-        _buildPhoneNumberTextField(),
-        SizedBox(height: 10.0),
+        _buildEmailTextField(),
+        SizedBox(height: 5.0),
         _buildPasswordTextField(),
         SizedBox(height: 10.0),
         _buildPasswordConfirmTextField(),
@@ -187,6 +262,7 @@ class _AuthPageState extends State<AuthPage> {
     return GestureDetector(
       onTap: _hideKeypad,
       child: Scaffold(
+        key: _scaffoldKey,
         body: SafeArea(
           child: Container(
             alignment: Alignment(0.0, 0.0),
