@@ -64,7 +64,8 @@ class _DecisionPageState extends State<DecisionPage> {
             if (snapshot.data == AuthState.AppStarted) {
               return SplashPage();
             } else if (snapshot.data == AuthState.Authenticated) {
-              return HomePage();
+              // return HomePage();
+              return TabPage();
             } else {
               return AuthPage();
             }
