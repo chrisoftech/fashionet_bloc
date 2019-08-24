@@ -1,1 +1,5 @@
-export 'tab_page/bottom_tab.dart';
+export 'explore/explore.dart';
+export 'home/home.dart';
+export 'library/library.dart';
+
+export 'tab_page/tab_page.dart';
