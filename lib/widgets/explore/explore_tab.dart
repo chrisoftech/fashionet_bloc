@@ -1,3 +1,4 @@
+import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
 
 class ExploreTab extends StatefulWidget {
@@ -42,27 +43,10 @@ class _ExploreTabState extends State<ExploreTab> {
                 icon: Icon(Icons.settings))
           ],
         ),
+        SliverToBoxAdapter(child: PageIndicator()),
+        SliverToBoxAdapter(child: PostCardDefault()),
         SliverList(
           delegate: SliverChildListDelegate([
-            Container(
-              padding: EdgeInsets.only(left: 20.0, right: _contentPadding * 8),
-              child: Container(
-                height: 10.0,
-                width: 50.0,
-                margin: EdgeInsets.only(bottom: 5.0),
-                decoration: BoxDecoration(
-                    color: Theme.of(context).accentColor,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(50.0),
-                      topRight: Radius.circular(50.0),
-                    )),
-              ),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
             SizedBox(
               height: 150.0,
               width: 200.0,
