@@ -7,7 +7,7 @@ class TabPage extends StatefulWidget {
 }
 
 class _TabPageState extends State<TabPage> {
-  int _activeTabIndex;
+  int _activeTabIndex = 0;
 
   Widget _buildTabBody() {
     if (_activeTabIndex == 1) {

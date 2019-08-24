@@ -8,82 +8,127 @@ class ExploreTab extends StatefulWidget {
 
 class _ExploreTabState extends State<ExploreTab> {
   Widget _buildFlexibleSpaceBarTitle() {
-    return Text('Explore',
-        style: Theme.of(context).textTheme.display1.copyWith(
-            color: Theme.of(context).primaryColor,
-            fontWeight: FontWeight.bold));
-  }
-
-  Widget _buildFlexibleSpaceBar() {
-    return FlexibleSpaceBar(
-      title: _buildFlexibleSpaceBarTitle(),
-      titlePadding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+    return Align(
+      alignment: Alignment.bottomLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 50.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: Text('Explore',
+                  style: Theme.of(context).textTheme.display2.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.bold)),
+            ),
+            PageIndicator()
+          ],
+        ),
+      ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildFlexibleSpaceBar() {
+    return FlexibleSpaceBar(background: _buildFlexibleSpaceBarTitle());
+  }
+
+  Widget _buildSearchField() {
     final double _deviceWidth = MediaQuery.of(context).size.width;
     final double _contentMaxWidth =
         _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .90;
 
     final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: _contentPadding),
+      child: Material(
+        child: Container(
+            child: TextField(
+          style: Theme.of(context).textTheme.display1.copyWith(
+              color: Theme.of(context).primaryColor,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold),
+          decoration: InputDecoration(
+            prefixIcon: Icon(Icons.search),
+            suffixIcon: Icon(Icons.mic),
+          ),
+        )),
+      ),
+    );
+  }
+
+  Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      pinned: true,
+      elevation: 0.0,
+      expandedHeight: 200.0,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: _buildFlexibleSpaceBar(),
+      bottom: PreferredSize(
+          preferredSize: Size.fromHeight(0.0), child: _buildSearchField()),
+    );
+  }
+
+  Widget _buildSectionLabel({@required String label}) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0, left: 20.0, bottom: 5.0),
+      child: Text('$label',
+          style: Theme.of(context).textTheme.display1.copyWith(
+              color: Theme.of(context).primaryColor,
+              fontSize: 20.0,
+              fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _buildCategories() {
+    return SliverToBoxAdapter(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _buildSectionLabel(label: 'Categories'),
+        Container(
+          height: 100.0,
+          child: ListView.builder(
+            itemCount: 10,
+            scrollDirection: Axis.horizontal,
+            itemBuilder: (context, index) {
+              return Row(
+                children: <Widget>[
+                  index == 0 ? SizedBox(width: 20.0) : Container(),
+                  CategoryLabel(),
+                  SizedBox(width: 10.0),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    ));
+  }
+
+  Widget _buildPostFeed() {
+    return SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+      return PostCardDefault();
+    }, childCount: 10));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // final double _deviceWidth = MediaQuery.of(context).size.width;
+    // final double _contentMaxWidth =
+    //     _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .90;
+
+    // final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
     return CustomScrollView(
       slivers: <Widget>[
-        SliverAppBar(
-          pinned: true,
-          expandedHeight: 150.0,
-          backgroundColor: Colors.white,
-          flexibleSpace: _buildFlexibleSpaceBar(),
-          actions: <Widget>[
-            IconButton(
-                onPressed: () {},
-                color: Theme.of(context).primaryColor,
-                iconSize: 30.0,
-                icon: Icon(Icons.settings))
-          ],
-        ),
-        SliverToBoxAdapter(child: PageIndicator()),
-        SliverToBoxAdapter(child: PostCardDefault()),
-        SliverList(
-          delegate: SliverChildListDelegate([
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-            SizedBox(
-              height: 150.0,
-              width: 200.0,
-              child: Card(),
-            ),
-          ]),
-        )
+        _buildSliverAppBar(),
+        // SliverToBoxAdapter(child: PageIndicator()),
+        _buildCategories(),
+        SliverToBoxAdapter(child: _buildSectionLabel(label: 'Post Feed')),
+        _buildPostFeed(),
       ],
     );
   }
