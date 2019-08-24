@@ -1,12 +1,10 @@
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:fashionet_bloc/models/models.dart';
-import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:country_code_picker/country_code_picker.dart';
 
 enum AuthMode { Login, SignUp }
 
@@ -20,7 +18,7 @@ class _AuthPageState extends State<AuthPage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   AuthMode _authMode = AuthMode.Login;
-  CountryCode _selectedCountryCode;
+  // CountryCode _selectedCountryCode;
 
   AuthBloc _authBloc;
 
@@ -37,12 +35,12 @@ class _AuthPageState extends State<AuthPage> {
     _authBloc = AuthProvider.of(context);
   }
 
-  @override
-  void dispose() {
-    _tapGestureRecognizer.dispose();
-    _authBloc.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _tapGestureRecognizer.dispose();
+  //   _authBloc.dispose();
+  //   super.dispose();
+  // }
 
   void _handleTap() {
     HapticFeedback.vibrate();
@@ -154,6 +152,7 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   void submitForm() async {
+    _hideKeypad();
     final ReturnType _isAuthenticated = _authMode == AuthMode.Login
         ? await _authBloc.signInUser()
         : await _authBloc.signUpUser();
@@ -236,12 +235,13 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildForm() {
     return Column(
       children: <Widget>[
+        SizedBox(height: 30.0),
         _buildFormTitle(),
         SizedBox(height: 30.0),
         _buildEmailTextField(),
         SizedBox(height: 5.0),
         _buildPasswordTextField(),
-        SizedBox(height: 10.0),
+        SizedBox(height: 5.0),
         _buildPasswordConfirmTextField(),
         SizedBox(height: 20.0),
         _buildActionButton(),
@@ -266,8 +266,7 @@ class _AuthPageState extends State<AuthPage> {
         body: SafeArea(
           child: Container(
             alignment: Alignment(0.0, 0.0),
-            padding: EdgeInsets.only(
-                top: 30.0, right: _contentPadding, left: _contentPadding),
+            padding: EdgeInsets.symmetric(horizontal: _contentPadding),
             child: SingleChildScrollView(child: _buildForm()),
           ),
         ),

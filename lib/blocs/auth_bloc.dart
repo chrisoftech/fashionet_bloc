@@ -16,7 +16,7 @@ class AuthBloc {
   // input controllers
   final _emailController = BehaviorSubject<String>();
   final _passwordController = BehaviorSubject<String>();
-  final _passwordConfirmController = BehaviorSubject<String>();
+  final _confirmPasswordController = BehaviorSubject<String>();
 
   // authentication states controllers
   final _authStateController = BehaviorSubject<AuthState>();
@@ -34,12 +34,12 @@ class AuthBloc {
       _emailController.stream.transform(_validateEmail);
   Observable<String> get password =>
       _passwordController.stream.transform(_validatePassword);
-  Observable<String> get confirmPassword => _passwordConfirmController.stream
+  Observable<String> get confirmPassword => _confirmPasswordController.stream
           .transform(_validatePassword)
           .doOnData((String c) {
         // compares _password controller value & confirm password value
         if (0 != _passwordController.value.compareTo(c)) {
-          _passwordConfirmController.sink.addError('Passwords do not match');
+          _confirmPasswordController.sink.addError('Passwords do not match');
         }
       });
 
@@ -61,11 +61,11 @@ class AuthBloc {
   Function(String) get onEmailChanged => _emailController.sink.add;
   Function(String) get onPasswordChanged => _passwordController.sink.add;
   Function(String) get onPasswordConfirmChanged =>
-      _passwordConfirmController.sink.add;
+      _confirmPasswordController.sink.add;
 
   final _validateEmail = StreamTransformer<String, String>.fromHandlers(
       handleData: (String email, EventSink<String> sink) {
-    if (email.isEmpty) {
+    if (email.isEmpty || !email.contains('@')) {
       sink.addError('Enter a valid email');
     } else {
       sink.add(email);
@@ -89,6 +89,12 @@ class AuthBloc {
     }
   }
 
+  void _resetControllers() {
+    _emailController.value = '';
+    _passwordController.value = '';
+    _confirmPasswordController.value = '';
+  }
+
   Future<ReturnType> authenticated() async {
     try {
       _authStateController.sink.add(AuthState.AppStarted);
@@ -108,10 +114,8 @@ class AuthBloc {
 
       return ReturnType(returnType: false, messagTag: 'Unauthenticated');
     } catch (e) {
-      _authStateController.sink.add(AuthState.Unauthenticated);
-      _loginStateController.sink.add(LoginState.Failure);
-
-      print(e.toString);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
+      // _loginStateController.sink.add(LoginState.Failure);
 
       return ReturnType(
           returnType: false, messagTag: (e as PlatformException).message);
@@ -130,13 +134,15 @@ class AuthBloc {
       _authStateController.sink.add(AuthState.Authenticated);
       _loginStateController.sink.add(LoginState.Success);
 
+      _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
       _authStateController.sink.add(AuthState.Unauthenticated);
       _loginStateController.sink.add(LoginState.Failure);
 
-      return ReturnType(
-          returnType: false, messagTag: (e as PlatformException).message);
+      return ReturnType(returnType: false, messagTag: e.message);
+      // return ReturnType(
+      //     returnType: false, messagTag: (e as PlatformException).message);
     }
   }
 
@@ -150,13 +156,15 @@ class AuthBloc {
       _authStateController.sink.add(AuthState.Authenticated);
       _loginStateController.sink.add(LoginState.Success);
 
+      _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
       _authStateController.sink.add(AuthState.Unauthenticated);
       _loginStateController.sink.add(LoginState.Failure);
 
-      return ReturnType(
-          returnType: false, messagTag: (e as PlatformException).message);
+      return ReturnType(returnType: false, messagTag: e.message);
+      // return ReturnType(
+      //     returnType: false, messagTag: (e as PlatformException).message);
     }
   }
 
@@ -166,24 +174,25 @@ class AuthBloc {
 
       await _authRepository.signOut();
 
+      _authStateController.sink.add(AuthState.Authenticated);
+      _loginStateController.sink.add(LoginState.Success);
+
       return ReturnType(returnType: true, messagTag: 'User Signed-Out');
     } catch (e) {
-      return ReturnType(
-          returnType: false, messagTag: (e as PlatformException).message);
+      _authStateController.sink.add(AuthState.Unauthenticated);
+      _loginStateController.sink.add(LoginState.Failure);
+
+      return ReturnType(returnType: false, messagTag: e.message);
+      // returnType: false, messagTag: (e as PlatformException).message);
     }
   }
 
   void dispose() {
-    _emailController?.drain();
-    _emailController?.close();
-    _passwordController?.drain();
-    _passwordController?.close();
-    _passwordConfirmController?.drain();
-    _passwordConfirmController?.close();
+    _emailController.close();
+    _passwordController.close();
+    _confirmPasswordController.close();
 
-    _authStateController?.drain();
-    _authStateController?.close();
-    _loginStateController?.drain();
-    _loginStateController?.close();
+    _authStateController.close();
+    _loginStateController.close();
   }
 }

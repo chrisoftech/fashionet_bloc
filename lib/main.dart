@@ -2,24 +2,40 @@ import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:flutter/material.dart';
 
 import 'blocs/blocs.dart';
-import 'models/models.dart';
 import 'providers/providers.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(AuthProvider(child: MyApp()));
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  AuthBloc _authBloc;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _authBloc = AuthProvider.of(context);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _authBloc.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AuthProvider(
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
-        theme: ThemeData(
-            fontFamily: 'QuickSand',
-            primarySwatch: Colors.indigo,
-            accentColor: Colors.amber),
-        home: DecisionPage(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
+      theme: ThemeData(
+          fontFamily: 'QuickSand',
+          primarySwatch: Colors.indigo,
+          accentColor: Colors.amber),
+      home: DecisionPage(),
     );
   }
 }
@@ -36,12 +52,6 @@ class _DecisionPageState extends State<DecisionPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _authBloc = AuthProvider.of(context);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _authBloc.dispose();
   }
 
   @override
