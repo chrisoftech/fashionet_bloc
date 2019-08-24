@@ -10,12 +10,12 @@ class _TabPageState extends State<TabPage> {
   int _activeTabIndex;
 
   Widget _buildTabBody() {
-    if (_activeTabIndex == 0) {
-      return HomeTab();
-    } else if (_activeTabIndex == 1) {
+    if (_activeTabIndex == 1) {
       return ExploreTab();
+    } else if (_activeTabIndex == 2) {
+      return LibraryTab();
     }
-    return LibraryTab();
+    return HomeTab();
   }
 
   @override
