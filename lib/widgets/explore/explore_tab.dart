@@ -2,11 +2,17 @@ import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
 
 class ExploreTab extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const ExploreTab({Key key, @required this.scrollController})
+      : super(key: key);
   @override
   _ExploreTabState createState() => _ExploreTabState();
 }
 
 class _ExploreTabState extends State<ExploreTab> {
+  ScrollController get _scrollController => widget.scrollController;
+
   Widget _buildFlexibleSpaceBarTitle() {
     return Align(
       alignment: Alignment.bottomLeft,
@@ -44,6 +50,7 @@ class _ExploreTabState extends State<ExploreTab> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: _contentPadding),
       child: Material(
+        elevation: 8.0,
         child: Container(
             child: TextField(
           style: Theme.of(context).textTheme.display1.copyWith(
@@ -53,6 +60,8 @@ class _ExploreTabState extends State<ExploreTab> {
           decoration: InputDecoration(
             prefixIcon: Icon(Icons.search),
             suffixIcon: Icon(Icons.mic),
+            hintText: 'Search Posts',
+            border: UnderlineInputBorder(borderSide: BorderSide.none),
           ),
         )),
       ),
@@ -123,9 +132,9 @@ class _ExploreTabState extends State<ExploreTab> {
 
     // final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
     return CustomScrollView(
+      controller: _scrollController,
       slivers: <Widget>[
         _buildSliverAppBar(),
-        // SliverToBoxAdapter(child: PageIndicator()),
         _buildCategories(),
         SliverToBoxAdapter(child: _buildSectionLabel(label: 'Post Feed')),
         _buildPostFeed(),

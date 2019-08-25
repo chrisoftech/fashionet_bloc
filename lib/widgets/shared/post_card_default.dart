@@ -130,23 +130,20 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
   @override
   Widget build(BuildContext context) {
-    final double _deviceWidth = MediaQuery.of(context).size.width;
-    final double _contentMaxWidth = _deviceWidth > 500.0 ? 500.0 : _deviceWidth;
+    // final double _deviceWidth = MediaQuery.of(context).size.width;
+    // final double _contentMaxWidth = _deviceWidth > 500.0 ? 500.0 : _deviceWidth;
 
-    final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+    // final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: _contentPadding),
-      child: Card(
-        elevation: 5.0,
-        child: Container(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _buildPostDetails(),
-              _buildPostImage(),
-            ],
-          ),
+    return Card(
+      elevation: 5.0,
+      child: Container(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildPostDetails(),
+            _buildPostImage(),
+          ],
         ),
       ),
     );

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 
 class LibraryTab extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const LibraryTab({Key key, @required this.scrollController})
+      : super(key: key);
   @override
   _LibraryTabState createState() => _LibraryTabState();
 }
 
 class _LibraryTabState extends State<LibraryTab> {
+  ScrollController get _scrollController => widget.scrollController;
+
   Widget _buildFlexibleSpaceBarTitle() {
     return Text('Library',
         style: Theme.of(context).textTheme.display1.copyWith(
@@ -28,6 +34,7 @@ class _LibraryTabState extends State<LibraryTab> {
 
     final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
     return CustomScrollView(
+      controller: _scrollController,
       slivers: <Widget>[
         SliverAppBar(
           pinned: true,

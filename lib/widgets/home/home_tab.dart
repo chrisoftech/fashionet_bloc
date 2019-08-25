@@ -2,11 +2,16 @@ import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
 
 class HomeTab extends StatefulWidget {
+  final ScrollController scrollController;
+
+  const HomeTab({Key key, @required this.scrollController}) : super(key: key);
   @override
   _HomeTabState createState() => _HomeTabState();
 }
 
 class _HomeTabState extends State<HomeTab> {
+  ScrollController get _scrollController => widget.scrollController;
+
   Widget _buildSliverAppBar() {
     return SliverAppBar(
       pinned: true,
@@ -111,6 +116,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
+      controller: _scrollController,
       slivers: <Widget>[
         _buildSliverAppBar(),
         SliverToBoxAdapter(child: PageIndicator()),
