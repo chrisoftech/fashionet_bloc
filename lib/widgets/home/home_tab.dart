@@ -12,21 +12,7 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   ScrollController get _scrollController => widget.scrollController;
 
-  Widget _buildSliverAppBar() {
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: 150.0,
-      backgroundColor: Colors.white,
-      flexibleSpace: _buildFlexibleSpaceBar(),
-      actions: <Widget>[
-        IconButton(
-            onPressed: () {},
-            color: Theme.of(context).primaryColor,
-            iconSize: 30.0,
-            icon: Icon(Icons.settings))
-      ],
-    );
-  }
+ 
 
   Widget _buildFlexibleSpaceBarTitle() {
     return Text('Home',
@@ -38,7 +24,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildFlexibleSpaceBar() {
     return FlexibleSpaceBar(
       title: _buildFlexibleSpaceBarTitle(),
-      titlePadding: EdgeInsets.only(left: 20.0, bottom: 10.0),
+      titlePadding: EdgeInsets.only(left: 20.0),
     );
   }
 
@@ -50,6 +36,22 @@ class _HomeTabState extends State<HomeTab> {
               color: Theme.of(context).primaryColor,
               fontSize: 20.0,
               fontWeight: FontWeight.bold)),
+    );
+  }
+
+   Widget _buildSliverAppBar() {
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: 110.0,
+      backgroundColor: Colors.white,
+      flexibleSpace: _buildFlexibleSpaceBar(),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () {},
+            color: Theme.of(context).primaryColor,
+            iconSize: 30.0,
+            icon: Icon(Icons.settings))
+      ],
     );
   }
 
@@ -117,6 +119,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     return CustomScrollView(
       controller: _scrollController,
+      physics: BouncingScrollPhysics(),
       slivers: <Widget>[
         _buildSliverAppBar(),
         SliverToBoxAdapter(child: PageIndicator()),

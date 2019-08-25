@@ -17,7 +17,7 @@ class _ExploreTabState extends State<ExploreTab> {
     return Align(
       alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 50.0),
+        padding: const EdgeInsets.only(bottom: 70.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,11 +72,11 @@ class _ExploreTabState extends State<ExploreTab> {
     return SliverAppBar(
       pinned: true,
       elevation: 0.0,
-      expandedHeight: 200.0,
+      expandedHeight: 190.0,
       backgroundColor: Colors.transparent,
       flexibleSpace: _buildFlexibleSpaceBar(),
       bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0.0), child: _buildSearchField()),
+          preferredSize: Size.fromHeight(10.0), child: _buildSearchField()),
     );
   }
 
@@ -133,6 +133,7 @@ class _ExploreTabState extends State<ExploreTab> {
     // final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
     return CustomScrollView(
       controller: _scrollController,
+      physics: BouncingScrollPhysics(),
       slivers: <Widget>[
         _buildSliverAppBar(),
         _buildCategories(),

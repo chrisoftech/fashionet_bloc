@@ -10,6 +10,7 @@ class _TabPageState extends State<TabPage> {
   int _activeTabIndex = 0;
 
   ScrollController _scrollController;
+  ScrollController _libraryTabScrollController;
   final _scrollThreshold = 5000.0;
 
   @override
@@ -17,24 +18,31 @@ class _TabPageState extends State<TabPage> {
     super.initState();
 
     _scrollController = ScrollController();
-    _scrollController.addListener(_scrollToTopExtent);
+    _libraryTabScrollController = ScrollController();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _libraryTabScrollController.dispose();
     super.dispose();
   }
 
-  void _scrollToTop() {
+  void _scrollToTop() async {
+    // if (_activeTabIndex == 2) {
+    //   await _libraryTabScrollController.animateTo(
+    //       _scrollController.position.minScrollExtent,
+    //       duration: Duration(milliseconds: 500),
+    //       curve: Curves.easeInOut);
+    // }
     _scrollController.animateTo(_scrollController.position.minScrollExtent,
         duration: Duration(milliseconds: 1000), curve: Curves.easeInOut);
   }
 
-  bool _scrollToTopExtent() {
-    print(_scrollController.position.pixels);
-    return _scrollController.position.pixels >= _scrollThreshold ? true : false;
-  }
+  // bool _scrollToTopExtent() {
+  //   print(_scrollController.position.pixels);
+  //   return _scrollController.position.pixels >= _scrollThreshold ? true : false;
+  // }
 
   Widget _builScrollToTopFAB() {
     return Material(
@@ -62,7 +70,10 @@ class _TabPageState extends State<TabPage> {
     if (_activeTabIndex == 1) {
       return ExploreTab(scrollController: _scrollController);
     } else if (_activeTabIndex == 2) {
-      return LibraryTab(scrollController: _scrollController);
+      return LibraryTab(
+        scrollController: _scrollController,
+        tabScrollController: _libraryTabScrollController,
+      );
     }
     return HomeTab(scrollController: _scrollController);
   }
