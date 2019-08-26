@@ -132,7 +132,6 @@ class _LibraryTabState extends State<LibraryTab>
   Widget _buildTabBarView() {
     return SliverFillRemaining(
       child: TabBarView(
-        physics: BouncingScrollPhysics(),
         controller: _tabController,
         children: <Widget>[
           BookmarkedTab(),
@@ -147,7 +146,6 @@ class _LibraryTabState extends State<LibraryTab>
   Widget build(BuildContext context) {
     return CustomScrollView(
       controller: _scrollController,
-      physics: BouncingScrollPhysics(),
       slivers: <Widget>[_buildSliverAppBar(), _buildTabBarView()],
     );
   }

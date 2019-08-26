@@ -12,8 +12,6 @@ class HomeTab extends StatefulWidget {
 class _HomeTabState extends State<HomeTab> {
   ScrollController get _scrollController => widget.scrollController;
 
- 
-
   Widget _buildFlexibleSpaceBarTitle() {
     return Text('Home',
         style: Theme.of(context).textTheme.display1.copyWith(
@@ -24,7 +22,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildFlexibleSpaceBar() {
     return FlexibleSpaceBar(
       title: _buildFlexibleSpaceBarTitle(),
-      titlePadding: EdgeInsets.only(left: 20.0),
+      titlePadding: EdgeInsets.only(left: 20.0, bottom: 10.0),
     );
   }
 
@@ -39,7 +37,7 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-   Widget _buildSliverAppBar() {
+  Widget _buildSliverAppBar() {
     return SliverAppBar(
       pinned: true,
       expandedHeight: 110.0,
@@ -82,41 +80,88 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildSuggestedPosts() {
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        _buildSectionLabel(label: 'Suggested'),
-        SizedBox(
-          height: 150.0,
-          width: 200.0,
-          child: Card(),
-        ),
-        SizedBox(
-          height: 150.0,
-          width: 200.0,
-          child: Card(),
-        ),
-        SizedBox(
-          height: 150.0,
-          width: 200.0,
-          child: Card(),
-        ),
-        SizedBox(
-          height: 150.0,
-          width: 200.0,
-          child: Card(),
-        ),
-        SizedBox(
-          height: 150.0,
-          width: 200.0,
-          child: Card(),
-        ),
-      ]),
+  Widget _buildSuggestedPosts({@required double contentPadding}) {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildSectionLabel(label: 'Suggested'),
+          Container(
+            alignment: Alignment(0.0, 0.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  // Icons.adb,
+                  Icons.new_releases,
+                  size: 70.0,
+                  color: Theme.of(context).primaryColor,
+                ),
+                Text(
+                  'No suggested posts yet',
+                  style: Theme.of(context).textTheme.display1.copyWith(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: contentPadding),
+                  child: Text(
+                    'All recommended and suggested posts will be displayed here',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.display1.copyWith(
+                        color: Theme.of(context).primaryColor, fontSize: 15.0),
+                  ),
+                ),
+                SizedBox(height: 20.0)
+              ],
+            ),
+          )
+        ],
+      ),
     );
+
+    // return SliverList(
+    //   delegate: SliverChildListDelegate([
+    //     _buildSectionLabel(label: 'Suggested'),
+    //     SizedBox(
+    //       height: 150.0,
+    //       width: 200.0,
+    //       child: Card(),
+    //     ),
+    //     SizedBox(
+    //       height: 150.0,
+    //       width: 200.0,
+    //       child: Card(),
+    //     ),
+    //     SizedBox(
+    //       height: 150.0,
+    //       width: 200.0,
+    //       child: Card(),
+    //     ),
+    //     SizedBox(
+    //       height: 150.0,
+    //       width: 200.0,
+    //       child: Card(),
+    //     ),
+    //     SizedBox(
+    //       height: 150.0,
+    //       width: 200.0,
+    //       child: Card(),
+    //     ),
+    //   ]),
+    // );
   }
 
   @override
   Widget build(BuildContext context) {
+    final double _deviceWidth = MediaQuery.of(context).size.width;
+    final double _contentMaxWidth =
+        _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .80;
+
+    final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+
     return CustomScrollView(
       controller: _scrollController,
       physics: BouncingScrollPhysics(),
@@ -124,7 +169,7 @@ class _HomeTabState extends State<HomeTab> {
         _buildSliverAppBar(),
         SliverToBoxAdapter(child: PageIndicator()),
         _buildLatestPosts(),
-        _buildSuggestedPosts()
+        _buildSuggestedPosts(contentPadding: _contentPadding)
       ],
     );
   }
