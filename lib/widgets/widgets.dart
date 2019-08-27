@@ -1,3 +1,4 @@
+export 'categories/categories.dart';
 export 'explore/explore.dart';
 export 'home/home.dart';
 export 'library/library.dart';

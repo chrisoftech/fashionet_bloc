@@ -1,5 +1,6 @@
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:flutter/material.dart';
+import 'package:popup_menu/popup_menu.dart';
 
 import 'blocs/blocs.dart';
 import 'providers/providers.dart';
@@ -36,6 +37,9 @@ class _MyAppState extends State<MyApp> {
           primarySwatch: Colors.indigo,
           accentColor: Colors.amber),
       home: DecisionPage(),
+      routes: <String, WidgetBuilder> {
+        '/categories': (context) => CategoriesPage()
+      },
     );
   }
 }
@@ -56,6 +60,8 @@ class _DecisionPageState extends State<DecisionPage> {
 
   @override
   Widget build(BuildContext context) {
+    PopupMenu.context = context;
+
     return StreamBuilder(
         stream: _authBloc.authState,
         builder: (context, AsyncSnapshot<AuthState> snapshot) {

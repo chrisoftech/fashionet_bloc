@@ -1,5 +1,8 @@
+import 'package:fashionet_bloc/pages/pages.dart';
+import 'package:fashionet_bloc/transitions/transitions.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
+import 'package:popup_menu/popup_menu.dart';
 
 class HomeTab extends StatefulWidget {
   final ScrollController scrollController;
@@ -11,6 +14,59 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   ScrollController get _scrollController => widget.scrollController;
+
+  GlobalKey _menuButtonKey = GlobalKey();
+
+  void _onClickMenu(MenuItemProvider item) {
+    if (item.menuTitle == 'Categories') {
+      Navigator.of(context).push(SlideLeftRoute(page: CategoriesPage()));
+    } else if (item.menuTitle == 'Signout') {
+      print('App signout');
+    }
+  }
+
+  void _onStateChanged(bool isShow) {
+    print('Menu is ${isShow ? 'Open' : 'Closed'}');
+  }
+
+  void _onDismiss() {
+    print('Menu is closed');
+  }
+
+  void _openCustomMenuOptions() {
+    PopupMenu _menu = PopupMenu(
+        maxColumn: 1,
+        items: [
+          MenuItem(
+              title: 'Profile',
+              image: Icon(
+                Icons.person_outline,
+                color: Colors.white,
+              )),
+          MenuItem(
+              title: 'Categories',
+              image: Icon(
+                Icons.category,
+                color: Colors.white,
+              )),
+          MenuItem(
+              title: 'Settings',
+              image: Icon(
+                Icons.settings,
+                color: Colors.white,
+              )),
+          MenuItem(
+              title: 'Signout',
+              image: Icon(
+                Icons.exit_to_app,
+                color: Colors.white,
+              )),
+        ],
+        onClickMenu: _onClickMenu,
+        stateChanged: _onStateChanged,
+        onDismiss: _onDismiss);
+    _menu.show(widgetKey: _menuButtonKey);
+  }
 
   Widget _buildFlexibleSpaceBarTitle() {
     return Text('Home',
@@ -45,10 +101,11 @@ class _HomeTabState extends State<HomeTab> {
       flexibleSpace: _buildFlexibleSpaceBar(),
       actions: <Widget>[
         IconButton(
-            onPressed: () {},
+            onPressed: _openCustomMenuOptions,
+            key: _menuButtonKey,
             color: Theme.of(context).primaryColor,
             iconSize: 30.0,
-            icon: Icon(Icons.settings))
+            icon: Icon(Icons.more_vert))
       ],
     );
   }
