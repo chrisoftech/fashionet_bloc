@@ -1,3 +1,5 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +9,21 @@ class ProfileFormPage extends StatefulWidget {
 }
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
+  AuthBloc _authBloc;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _authBloc = AuthProvider.of(context);
+  }
+
+  @override
+  void dispose() {
+    _authBloc.dispose();
+    super.dispose();
+  }
+
   void _hideKeypad() {
     FocusScope.of(context).requestFocus(FocusNode());
   }
@@ -190,7 +207,9 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     );
   }
 
-  void submitForm() {}
+  void submitForm() {
+    _authBloc.signOutUser();
+  }
 
   Widget _buildActionButton() {
     return Align(

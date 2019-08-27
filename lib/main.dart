@@ -5,7 +5,13 @@ import 'package:popup_menu/popup_menu.dart';
 import 'blocs/blocs.dart';
 import 'providers/providers.dart';
 
-void main() => runApp(AuthProvider(child: MyApp()));
+void main() => runApp(
+      AuthProvider(
+        child: ProfileProvider(
+          child: MyApp(),
+        ),
+      ),
+    );
 
 class MyApp extends StatefulWidget {
   @override
@@ -14,17 +20,20 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   AuthBloc _authBloc;
+  ProfileBloc _profileBloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _authBloc = AuthProvider.of(context);
+    _profileBloc = ProfileProvider.of(context);
   }
 
   @override
   void dispose() {
     super.dispose();
     _authBloc.dispose();
+    _profileBloc.dispose();
   }
 
   @override
@@ -36,44 +45,58 @@ class _MyAppState extends State<MyApp> {
           fontFamily: 'QuickSand',
           primarySwatch: Colors.indigo,
           accentColor: Colors.amber),
-      home: DecisionPage(),
-      routes: <String, WidgetBuilder> {
+      home: AuthDecisionPage(),
+      routes: <String, WidgetBuilder>{
         '/categories': (context) => CategoriesPage()
       },
     );
   }
 }
 
-class DecisionPage extends StatefulWidget {
-  @override
-  _DecisionPageState createState() => _DecisionPageState();
-}
-
-class _DecisionPageState extends State<DecisionPage> {
-  AuthBloc _authBloc;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _authBloc = AuthProvider.of(context);
-  }
-
+class AuthDecisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PopupMenu.context = context;
 
+    AuthBloc _authBloc = AuthProvider.of(context);
+    ProfileBloc _profileBloc = ProfileProvider.of(context);
+    
     return StreamBuilder(
         stream: _authBloc.authState,
         builder: (context, AsyncSnapshot<AuthState> snapshot) {
-          print(snapshot.data.toString());
+          print('Auth Descision Page ${snapshot.data.toString()}');
           if (snapshot.hasData) {
             if (snapshot.data == AuthState.AppStarted) {
               return SplashPage();
             } else if (snapshot.data == AuthState.Authenticated) {
-              // return HomePage();
-              return TabPage();
+
+              _profileBloc.hasProfile();
+              return ProfileFormPage();
             } else {
               return AuthPage();
+            }
+          }
+          return SplashPage();
+        });
+  }
+}
+
+class ProfileDecisionPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    ProfileBloc _profileBloc = ProfileProvider.of(context);
+
+    return StreamBuilder<ProfileState>(
+        stream: _profileBloc.profileState,
+        builder: (context, snapshot) {
+          print('Profile Descision Page ${snapshot.data.toString()}');
+          if (snapshot.hasData) {
+            if (snapshot.data == ProfileState.Default) {
+              return SplashPage();
+            } else if (snapshot.data == ProfileState.HasProfile) {
+              return TabPage();
+            } else {
+              return ProfileFormPage();
             }
           }
           return SplashPage();
