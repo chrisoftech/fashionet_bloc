@@ -18,12 +18,6 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     _authBloc = AuthProvider.of(context);
   }
 
-  @override
-  void dispose() {
-    _authBloc.dispose();
-    super.dispose();
-  }
-
   void _hideKeypad() {
     FocusScope.of(context).requestFocus(FocusNode());
   }

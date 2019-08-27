@@ -35,13 +35,6 @@ class _AuthPageState extends State<AuthPage> {
     _authBloc = AuthProvider.of(context);
   }
 
-  // @override
-  // void dispose() {
-  //   _tapGestureRecognizer.dispose();
-  //   _authBloc.dispose();
-  //   super.dispose();
-  // }
-
   void _handleTap() {
     HapticFeedback.vibrate();
     setState(() {

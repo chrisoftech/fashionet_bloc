@@ -134,7 +134,7 @@ class AuthBloc {
       _authStateController.sink.add(AuthState.Authenticated);
       _loginStateController.sink.add(LoginState.Success);
 
-      _resetControllers();
+      // _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
       _authStateController.sink.add(AuthState.Unauthenticated);
@@ -156,7 +156,7 @@ class AuthBloc {
       _authStateController.sink.add(AuthState.Authenticated);
       _loginStateController.sink.add(LoginState.Success);
 
-      _resetControllers();
+      // _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
       _authStateController.sink.add(AuthState.Unauthenticated);
