@@ -85,15 +85,17 @@ class _CategoryFormState extends State<CategoryForm> {
   }
 
   Widget _buildCategoryForm() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        _buildFormTitle(),
-        _buildTitleTextField(),
-        _buildDescriptioneTextField(),
-        SizedBox(height: 20.0),
-        _buildActionButton(),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          _buildFormTitle(),
+          _buildTitleTextField(),
+          _buildDescriptioneTextField(),
+          SizedBox(height: 20.0),
+          _buildActionButton(),
+        ],
+      ),
     );
   }
 
