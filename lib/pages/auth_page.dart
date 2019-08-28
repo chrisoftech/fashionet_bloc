@@ -69,22 +69,7 @@ class _AuthPageState extends State<AuthPage> {
         builder: (context, snapshot) {
           return Row(
             children: <Widget>[
-              // CountryCodePicker(
-              //   onChanged: (CountryCode countryCode) {
-              //     _selectedCountryCode = countryCode;
-              //   },
-              //   initialSelection: '+233',
-              //   favorite: ['+233'],
-              //   showCountryOnly: false,
-              //   padding: EdgeInsets.only(
-              //       top: snapshot.error == null ? 3.0 : 0.0,
-              //       bottom: snapshot.error == null ? 0.0 : 15.0,
-              //       right: 2.0),
-              //   textStyle: TextStyle(
-              //       color: Theme.of(context).primaryColor,
-              //       fontSize: 17.0,
-              //       fontWeight: FontWeight.bold),
-              // ),
+            
               Flexible(
                 child: TextField(
                   onChanged: _authBloc.onEmailChanged,

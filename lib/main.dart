@@ -60,7 +60,7 @@ class AuthDecisionPage extends StatelessWidget {
 
     AuthBloc _authBloc = AuthProvider.of(context);
     ProfileBloc _profileBloc = ProfileProvider.of(context);
-    
+
     return StreamBuilder(
         stream: _authBloc.authState,
         builder: (context, AsyncSnapshot<AuthState> snapshot) {
@@ -69,7 +69,6 @@ class AuthDecisionPage extends StatelessWidget {
             if (snapshot.data == AuthState.AppStarted) {
               return SplashPage();
             } else if (snapshot.data == AuthState.Authenticated) {
-
               _profileBloc.hasProfile();
               return ProfileFormPage();
             } else {

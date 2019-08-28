@@ -1,7 +1,9 @@
+import 'package:country_code_picker/country_code_picker.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:libphonenumber/libphonenumber.dart';
 
 import 'package:multi_image_picker/multi_image_picker.dart';
 
@@ -12,6 +14,12 @@ class ProfileFormPage extends StatefulWidget {
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
   AuthBloc _authBloc;
+  ProfileBloc _profileBloc;
+
+  CountryCode _selectedCountryCode;
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _otherPhoneNumberController =
+      TextEditingController();
 
   List<Asset> _images = List<Asset>();
   String _error = 'No Error Dectected';
@@ -21,6 +29,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     super.didChangeDependencies();
 
     _authBloc = AuthProvider.of(context);
+    _profileBloc = ProfileProvider.of(context);
   }
 
   void _hideKeypad() {
@@ -198,66 +207,154 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   }
 
   Widget _buildFirstNameTextField() {
-    return TextField(
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'First Name'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.firstName,
+        builder: (context, snapshot) {
+          return TextField(
+            style: TextStyles.textFieldTextStyle,
+            onChanged: _profileBloc.onFirstNameChanged,
+            decoration: InputDecoration(
+                labelText: 'First Name', errorText: snapshot.error),
+          );
+        });
   }
 
   Widget _buildLastNameTextField() {
-    return TextField(
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Last Name'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.lastName,
+        builder: (context, snapshot) {
+          return TextField(
+            style: TextStyles.textFieldTextStyle,
+            onChanged: _profileBloc.onLastNameChanged,
+            decoration: InputDecoration(
+                labelText: 'Last Name', errorText: snapshot.error),
+          );
+        });
   }
 
   Widget _buildBusinessNameTextField() {
-    return TextField(
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Business Name'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.businessName,
+        builder: (context, snapshot) {
+          return TextField(
+            style: TextStyles.textFieldTextStyle,
+            onChanged: _profileBloc.onBusinessNameChanged,
+            decoration: InputDecoration(
+                labelText: 'Business Name', errorText: snapshot.error),
+          );
+        });
   }
 
   Widget _buildBusinessDescriptionTextField() {
-    return TextField(
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Business Description'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.businesDescription,
+        builder: (context, snapshot) {
+          return TextField(
+            style: TextStyles.textFieldTextStyle,
+            onChanged: _profileBloc.onBusinessDescriptionChanged,
+            decoration: InputDecoration(
+                labelText: 'Business Description', errorText: snapshot.error),
+          );
+        });
   }
 
   Widget _buildPhoneNumberTextField() {
-    return TextField(
-      keyboardType: TextInputType.phone,
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Phone Number'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.phoneNumber,
+        builder: (context, snapshot) {
+          return Row(
+            children: <Widget>[
+              CountryCodePicker(
+                onChanged: (CountryCode countryCode) {
+                  _selectedCountryCode = countryCode;
+                  _profileBloc.onCountryCodeChanged(countryCode);
+                },
+                initialSelection: '+233',
+                favorite: ['+233'],
+                showCountryOnly: false,
+                padding: EdgeInsets.only(
+                    top: snapshot.error == null ? 13.0 : 0.0,
+                    bottom: snapshot.error == null ? 0.0 : 7.0,
+                    right: 2.0),
+                textStyle: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 17.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              Flexible(
+                child: TextField(
+                  keyboardType: TextInputType.phone,
+                  style: TextStyles.textFieldTextStyle,
+                  controller: _phoneNumberController,
+                  onChanged: _profileBloc.onPhoneNumberChanged,
+                  decoration: InputDecoration(
+                      labelText: 'Phone Number', errorText: snapshot.error),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   Widget _buildOtherPhoneNumberTextField() {
-    return TextField(
-      keyboardType: TextInputType.phone,
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(labelText: 'Other Phone Number'),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.otherPhoneNumber,
+        builder: (context, snapshot) {
+          return TextField(
+            keyboardType: TextInputType.phone,
+            style: TextStyles.textFieldTextStyle,
+            controller: _otherPhoneNumberController,
+            onChanged: _profileBloc.onOtherPhoneNumberChanged,
+            decoration: InputDecoration(
+              labelText: 'Other Phone Number',
+              prefixText: '$_selectedCountryCode ',
+              errorText: snapshot.error,
+            ),
+          );
+        });
   }
 
   Widget _buildLocationTextField() {
-    return TextField(
-      style: TextStyles.textFieldTextStyle,
-      decoration: InputDecoration(
-        labelText: 'Location',
-        prefixIcon: Icon(Icons.location_on),
-      ),
-    );
+    return StreamBuilder<String>(
+        stream: _profileBloc.location,
+        builder: (context, snapshot) {
+          return TextField(
+            style: TextStyles.textFieldTextStyle,
+            onChanged: _profileBloc.onLocationChanged,
+            decoration: InputDecoration(
+              labelText: 'Location',
+              prefixIcon: Icon(Icons.location_on),
+              errorText: snapshot.error,
+            ),
+          );
+        });
   }
 
-  void submitForm() {
-    _authBloc.signOutUser();
+  Future submitForm() async {
+    if (!await PhoneNumberUtil.isValidPhoneNumber(
+        phoneNumber:
+            '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
+        isoCode: _selectedCountryCode.code)) {
+      print('Phone number is invalid!');
+
+      return;
+    }
+
+    if (!await PhoneNumberUtil.isValidPhoneNumber(
+        phoneNumber:
+            '${_selectedCountryCode.dialCode}${_otherPhoneNumberController.text}',
+        isoCode: _selectedCountryCode.code)) {
+      print('Other phone number is invalid!');
+
+      return;
+    }
+
+    // _authBloc.signOutUser();
   }
 
   Widget _buildActionButton() {
     return Align(
-      alignment: Alignment.bottomRight,
+      alignment: Alignment.bottomCenter,
       child: RaisedButton(
         onPressed: () => submitForm(),
         color: Theme.of(context).accentColor,
@@ -295,9 +392,10 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       onTap: _hideKeypad,
       child: Scaffold(
         floatingActionButton: _buildActionButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         body: SafeArea(
           child: CustomScrollView(
+            physics: BouncingScrollPhysics(),
             slivers: <Widget>[
               SliverAppBar(
                 pinned: true,
@@ -352,7 +450,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                             sectionDetails:
                                 'Where can your clients locate you?'),
                         _buildLocationTextField(),
-                        SizedBox(height: 50.0),
+                        SizedBox(height: 60.0),
                       ],
                     ),
                   ),
