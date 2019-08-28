@@ -58,12 +58,12 @@ class ProfileBloc with ProfileValidators {
       _countryCodeController.stream; // country code
   Observable<String> get phoneNumber =>
       _phoneNumberController.stream.transform(validatePhoneNumber);
-  Observable<String> get otherPhoneNumber =>
-      _otherPhoneNumberController.stream.transform(validateOtherPhoneNumber);
+  // Observable<String> get otherPhoneNumber =>
+  //     _otherPhoneNumberController.stream.transform(validateOtherPhoneNumber);
 
   Observable<String> get location =>
       _locationController.stream.transform(validateLocation);
-  Observable<Asset> get profileImage => _profileImageController.stream;
+  // Observable<Asset> get profileImage => _profileImageController.stream;
 
   Function(String) get onFirstNameChanged => _firstNameController.add;
   Function(String) get onLastNameChanged => _lastNameController.add;
@@ -78,15 +78,14 @@ class ProfileBloc with ProfileValidators {
   Function(String) get onLocationChanged => _locationController.add;
   Function(Asset) get onProfileImageChanged => _profileImageController.add;
 
-  Observable<bool> get validateForm => Observable.combineLatest7(
+  Observable<bool> get validateForm => Observable.combineLatest6(
       firstName,
       lastName,
       businessName,
       businessDescription,
       phoneNumber,
-      otherPhoneNumber,
       location,
-      (f, n, b, d, p, o, l) => true);
+      (f, n, b, d, p, l) => true);
 
   Future<String> _uploadProfileImage({@required Asset asset}) {
     try {
@@ -187,5 +186,6 @@ class ProfileBloc with ProfileValidators {
     _phoneNumberController?.close();
     _otherPhoneNumberController?.close();
     _locationController?.close();
+    _profileImageController?.close();
   }
 }

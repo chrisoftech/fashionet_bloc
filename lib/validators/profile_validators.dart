@@ -48,15 +48,15 @@ class ProfileValidators {
     }
   });
 
-  final validateOtherPhoneNumber =
-      StreamTransformer<String, String>.fromHandlers(
-          handleData: (String otherPhoneNumber, EventSink<String> sink) {
-    if (otherPhoneNumber.isEmpty) {
-      sink.addError('Enter your other phone number');
-    } else {
-      sink.add(otherPhoneNumber);
-    }
-  });
+  // final validateOtherPhoneNumber =
+  //     StreamTransformer<String, String>.fromHandlers(
+  //         handleData: (String otherPhoneNumber, EventSink<String> sink) {
+  //   if (otherPhoneNumber.isEmpty) {
+  //     sink.addError('Enter your other phone number');
+  //   } else {
+  //     sink.add(otherPhoneNumber);
+  //   }
+  // });
 
   final validateLocation = StreamTransformer<String, String>.fromHandlers(
       handleData: (String location, EventSink<String> sink) {

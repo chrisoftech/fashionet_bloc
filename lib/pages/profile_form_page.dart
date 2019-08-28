@@ -310,21 +310,16 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
   }
 
   Widget _buildOtherPhoneNumberTextField() {
-    return StreamBuilder<String>(
-        stream: _profileBloc.otherPhoneNumber,
-        builder: (context, snapshot) {
-          return TextField(
-            keyboardType: TextInputType.phone,
-            style: TextStyles.textFieldTextStyle,
-            controller: _otherPhoneNumberController,
-            onChanged: _profileBloc.onOtherPhoneNumberChanged,
-            decoration: InputDecoration(
-              labelText: 'Other Phone Number',
-              prefixText: '$_selectedCountryCode ',
-              errorText: snapshot.error,
-            ),
-          );
-        });
+    return TextField(
+      keyboardType: TextInputType.phone,
+      style: TextStyles.textFieldTextStyle,
+      controller: _otherPhoneNumberController,
+      onChanged: _profileBloc.onOtherPhoneNumberChanged,
+      decoration: InputDecoration(
+        labelText: 'Other Phone Number',
+        prefixText: '$_selectedCountryCode ',
+      ),
+    );
   }
 
   Widget _buildLocationTextField() {
@@ -380,20 +375,14 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       return;
     }
 
-    if (!await PhoneNumberUtil.isValidPhoneNumber(
-        phoneNumber:
-            '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
-        isoCode: _selectedCountryCode.code)) {
-      _showSnackbar(message: 'Primary phone number is invalid!');
-      return;
-    }
-
-    if (!await PhoneNumberUtil.isValidPhoneNumber(
-        phoneNumber:
-            '${_selectedCountryCode.dialCode}${_otherPhoneNumberController.text}',
-        isoCode: _selectedCountryCode.code)) {
-      _showSnackbar(message: 'Other phone number is invalid!');
-      return;
+    if (_otherPhoneNumberController.text.isNotEmpty) {
+      if (!await PhoneNumberUtil.isValidPhoneNumber(
+          phoneNumber:
+              '${_selectedCountryCode.dialCode}${_otherPhoneNumberController.text}',
+          isoCode: _selectedCountryCode.code)) {
+        _showSnackbar(message: 'Other phone number is invalid!');
+        return;
+      }
     }
 
     ReturnType _isCreated = await _profileBloc.createProfile();
