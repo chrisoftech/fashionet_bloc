@@ -15,6 +15,9 @@ class ProfileFormPage extends StatefulWidget {
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  ScrollController _scrollController;
+
   AuthBloc _authBloc;
   ProfileBloc _profileBloc;
 
@@ -25,6 +28,13 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
 
   List<Asset> _images = List<Asset>();
   String _error = 'No Error Dectected';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController = ScrollController();
+  }
 
   @override
   void didChangeDependencies() {
@@ -73,6 +83,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
 
     setState(() {
       _images = resultList;
+      _profileBloc.onProfileImageChanged(resultList[0]);
       _error = error;
     });
   }
@@ -347,7 +358,28 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
       ..showSnackBar(snackbar);
   }
 
-  Future submitForm() async {
+  Future<void> _scrollToStart() async {
+    await _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: Duration(milliseconds: 1000),
+        curve: Curves.easeIn);
+  }
+
+  void _submitForm() async {
+    if (_images.isEmpty) {
+      _showSnackbar(message: 'Please select a profile image to continue!');
+      _scrollToStart();
+      return;
+    }
+
+    if (!await PhoneNumberUtil.isValidPhoneNumber(
+        phoneNumber:
+            '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
+        isoCode: _selectedCountryCode.code)) {
+      _showSnackbar(message: 'Primary phone number is invalid!');
+      return;
+    }
+
     if (!await PhoneNumberUtil.isValidPhoneNumber(
         phoneNumber:
             '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
@@ -384,7 +416,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
                     onPressed: (validatorSnapshot.hasData &&
                             validatorSnapshot.data &&
                             snapshot.data != ProfileState.Loading)
-                        ? () => submitForm()
+                        ? () => _submitForm()
                         : null,
                     color: Theme.of(context).accentColor,
                     shape: RoundedRectangleBorder(
@@ -435,6 +467,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         body: SafeArea(
           child: CustomScrollView(
+            controller: _scrollController,
             physics: BouncingScrollPhysics(),
             slivers: <Widget>[
               SliverAppBar(

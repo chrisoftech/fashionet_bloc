@@ -28,9 +28,12 @@ dependencies:
   multi_image_picker: ^4.5.2
   sliding_up_panel: ^0.3.4
   libphonenumber: ^1.0.0
+  uuid: ^2.0.2
+  flutter_image_compress: ^0.6.3
   rxdart: ^0.22.1+1
   firebase_auth: ^0.14.0+2
   cloud_firestore: ^0.12.9
+  firebase_storage: ^3.0.6
 
 dev_dependencies:
   flutter_test:

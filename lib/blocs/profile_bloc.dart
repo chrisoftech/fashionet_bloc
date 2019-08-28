@@ -6,6 +6,7 @@ import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/repositories/repositories.dart';
 import 'package:fashionet_bloc/validators/validators.dart';
 import 'package:flutter/material.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:rxdart/rxdart.dart';
 
 enum ProfileStatus { Default, HasProfile, NoProfile }
@@ -13,6 +14,7 @@ enum ProfileState { Default, Loading, Success, Failure }
 
 class ProfileBloc with ProfileValidators {
   final ProfileRepository _profileRepository;
+  final ImageRepository _imageRepository;
 
   final _profileStatusController = BehaviorSubject<ProfileStatus>();
   final _profileStateController = BehaviorSubject<ProfileState>();
@@ -28,8 +30,11 @@ class ProfileBloc with ProfileValidators {
   final _phoneNumberController = BehaviorSubject<String>();
   final _otherPhoneNumberController = BehaviorSubject<String>();
   final _locationController = BehaviorSubject<String>();
+  final _profileImageController = BehaviorSubject<Asset>();
 
-  ProfileBloc() : _profileRepository = ProfileRepository();
+  ProfileBloc()
+      : _profileRepository = ProfileRepository(),
+        _imageRepository = ImageRepository();
 
   Observable<ProfileStatus> get profileStatus =>
       _profileStatusController.stream.defaultIfEmpty(ProfileStatus.Default);
@@ -58,6 +63,7 @@ class ProfileBloc with ProfileValidators {
 
   Observable<String> get location =>
       _locationController.stream.transform(validateLocation);
+  Observable<Asset> get profileImage => _profileImageController.stream;
 
   Function(String) get onFirstNameChanged => _firstNameController.add;
   Function(String) get onLastNameChanged => _lastNameController.add;
@@ -70,6 +76,7 @@ class ProfileBloc with ProfileValidators {
   Function(String) get onOtherPhoneNumberChanged =>
       _otherPhoneNumberController.add;
   Function(String) get onLocationChanged => _locationController.add;
+  Function(Asset) get onProfileImageChanged => _profileImageController.add;
 
   Observable<bool> get validateForm => Observable.combineLatest7(
       firstName,
@@ -80,6 +87,14 @@ class ProfileBloc with ProfileValidators {
       otherPhoneNumber,
       location,
       (f, n, b, d, p, o, l) => true);
+
+  Future<String> _uploadProfileImage({@required Asset asset}) {
+    try {
+      return _imageRepository.saveProfileImage(asset: asset);
+    } catch (e) {
+      throw (e);
+    }
+  }
 
   void _mapStreamToProfile({@required Stream<DocumentSnapshot> document}) {
     document.listen(
@@ -94,7 +109,7 @@ class ProfileBloc with ProfileValidators {
             phoneNumber: snapshot.data['phoneNumber'],
             otherPhoneNumber: snapshot.data['otherPhoneNumber'],
             businessLocation: snapshot.data['businessLocation'],
-            profileImageUrl: snapshot.data['profileImageUrl'],
+            profileImageUrl: snapshot.data['imageUrl'],
             created: snapshot.data['created'],
             lastUpdate: snapshot.data['lastUpdate'],
           );
@@ -131,6 +146,9 @@ class ProfileBloc with ProfileValidators {
     try {
       _profileStateController.add(ProfileState.Loading);
 
+      final String _imageUrl =
+          await _uploadProfileImage(asset: _profileImageController.value);
+
       await _profileRepository.createProfile(
         firstname: _firstNameController.value,
         lastname: _lastNameController.value,
@@ -140,11 +158,11 @@ class ProfileBloc with ProfileValidators {
         phoneNumber: _phoneNumberController.value,
         otherPhoneNumber: _otherPhoneNumberController.value,
         location: _locationController.value,
-        imageUrl: '',
+        imageUrl: _imageUrl,
       );
 
       _profileStateController.add(ProfileState.Success);
-      
+
       return ReturnType(
           returnType: true, messagTag: 'Profile created successfully');
     } catch (e) {
