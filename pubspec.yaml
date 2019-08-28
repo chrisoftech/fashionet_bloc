@@ -26,6 +26,7 @@ dependencies:
   country_code_picker: ^1.1.7
   popup_menu: ^1.0.2
   multi_image_picker: ^4.5.2
+  flushbar: ^1.8.2
   sliding_up_panel: ^0.3.4
   libphonenumber: ^1.0.0
   uuid: ^2.0.2

@@ -8,7 +8,7 @@ import 'providers/providers.dart';
 void main() => runApp(
       AuthProvider(
         child: ProfileProvider(
-          child: MyApp(),
+          child: CategoryProvider(child: MyApp()),
         ),
       ),
     );
@@ -21,12 +21,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   AuthBloc _authBloc;
   ProfileBloc _profileBloc;
+  CategoryBloc _categoryBloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _authBloc = AuthProvider.of(context);
     _profileBloc = ProfileProvider.of(context);
+    _categoryBloc = CategoryProvider.of(context);
   }
 
   @override
@@ -34,6 +36,7 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
     _authBloc.dispose();
     _profileBloc.dispose();
+    _categoryBloc.dispose();
   }
 
   @override

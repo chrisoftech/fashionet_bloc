@@ -13,7 +13,7 @@ class ProfileService {
     return _profileCollection.document(userId).snapshots();
   }
 
-  Future<void> createdProfile(
+  Future<void> createProfile(
       {@required String userId,
       @required String firstname,
       @required String lastname,

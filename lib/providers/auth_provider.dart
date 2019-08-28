@@ -8,6 +8,7 @@ class AuthProvider extends InheritedWidget {
       : bloc = AuthBloc(),
         super(key: key, child: child);
 
+  @override
   bool updateShouldNotify(_) => true;
 
   static AuthBloc of(BuildContext context) {

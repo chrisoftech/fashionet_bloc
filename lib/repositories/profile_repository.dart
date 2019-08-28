@@ -36,7 +36,7 @@ class ProfileRepository {
       final String _currentUserId =
           (await _authRepository.authenticated())?.uid;
 
-      return _profileService.createdProfile(
+      return _profileService.createProfile(
         userId: _currentUserId,
         firstname: firstname,
         lastname: lastname,

@@ -1,4 +1,3 @@
-import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
 import 'package:flutter/material.dart';
