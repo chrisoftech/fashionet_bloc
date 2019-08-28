@@ -8,12 +8,15 @@ import 'package:fashionet_bloc/validators/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-enum ProfileState { Default, HasProfile, NoProfile }
+enum ProfileStatus { Default, HasProfile, NoProfile }
+enum ProfileState { Default, Loading, Success, Failure }
 
 class ProfileBloc with ProfileValidators {
   final ProfileRepository _profileRepository;
 
+  final _profileStatusController = BehaviorSubject<ProfileStatus>();
   final _profileStateController = BehaviorSubject<ProfileState>();
+
   final _currentUserProfileController = BehaviorSubject<Profile>();
 
   final _firstNameController = BehaviorSubject<String>();
@@ -28,8 +31,11 @@ class ProfileBloc with ProfileValidators {
 
   ProfileBloc() : _profileRepository = ProfileRepository();
 
+  Observable<ProfileStatus> get profileStatus =>
+      _profileStatusController.stream.defaultIfEmpty(ProfileStatus.Default);
   Observable<ProfileState> get profileState =>
       _profileStateController.stream.defaultIfEmpty(ProfileState.Default);
+
   Observable<Profile> get currentUserProfile =>
       _currentUserProfileController.stream;
 
@@ -39,7 +45,7 @@ class ProfileBloc with ProfileValidators {
       _lastNameController.stream.transform(validateLastName);
   Observable<String> get businessName =>
       _businessNameController.stream.transform(validateBusinessName);
-  Observable<String> get businesDescription =>
+  Observable<String> get businessDescription =>
       _businessDescriptionController.stream
           .transform(validateBusinessDescription);
 
@@ -65,6 +71,16 @@ class ProfileBloc with ProfileValidators {
       _otherPhoneNumberController.add;
   Function(String) get onLocationChanged => _locationController.add;
 
+  Observable<bool> get validateForm => Observable.combineLatest7(
+      firstName,
+      lastName,
+      businessName,
+      businessDescription,
+      phoneNumber,
+      otherPhoneNumber,
+      location,
+      (f, n, b, d, p, o, l) => true);
+
   void _mapStreamToProfile({@required Stream<DocumentSnapshot> document}) {
     document.listen(
       (snapshot) {
@@ -84,12 +100,12 @@ class ProfileBloc with ProfileValidators {
           );
 
           _currentUserProfileController.sink.add(_profile);
-          _profileStateController.sink.add(ProfileState.HasProfile);
+          _profileStatusController.sink.add(ProfileStatus.HasProfile);
           return;
         }
 
         _currentUserProfileController.sink.add(null);
-        _profileStateController.sink.add(ProfileState.NoProfile);
+        _profileStatusController.sink.add(ProfileStatus.NoProfile);
         return;
       },
     );
@@ -97,7 +113,7 @@ class ProfileBloc with ProfileValidators {
 
   void hasProfile() {
     try {
-      _profileStateController.sink.add(ProfileState.Default);
+      _profileStatusController.sink.add(ProfileStatus.Default);
 
       _profileRepository.hasProfile().then((Stream<DocumentSnapshot> document) {
         return _mapStreamToProfile(document: document);
@@ -106,13 +122,43 @@ class ProfileBloc with ProfileValidators {
       print(e.toString());
 
       _currentUserProfileController.sink.add(null);
-      _profileStateController.sink.add(ProfileState.NoProfile);
+      _profileStatusController.sink.add(ProfileStatus.NoProfile);
       return;
     }
   }
 
+  Future<ReturnType> createProfile() async {
+    try {
+      _profileStateController.add(ProfileState.Loading);
+
+      await _profileRepository.createProfile(
+        firstname: _firstNameController.value,
+        lastname: _lastNameController.value,
+        businessName: _businessNameController.value,
+        businessDescription: _businessDescriptionController.value,
+        dialCode: _countryCodeController.value.dialCode,
+        phoneNumber: _phoneNumberController.value,
+        otherPhoneNumber: _otherPhoneNumberController.value,
+        location: _locationController.value,
+        imageUrl: '',
+      );
+
+      _profileStateController.add(ProfileState.Success);
+      
+      return ReturnType(
+          returnType: true, messagTag: 'Profile created successfully');
+    } catch (e) {
+      print(e.toString());
+      _profileStateController.add(ProfileState.Failure);
+
+      return ReturnType(
+          returnType: false,
+          messagTag: 'An error occured while creating profile!');
+    }
+  }
+
   void dispose() {
-    _profileStateController?.close();
+    _profileStatusController?.close();
     _currentUserProfileController?.close();
 
     _firstNameController?.close();

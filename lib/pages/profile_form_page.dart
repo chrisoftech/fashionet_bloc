@@ -1,5 +1,6 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class ProfileFormPage extends StatefulWidget {
 }
 
 class _ProfileFormPageState extends State<ProfileFormPage> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   AuthBloc _authBloc;
   ProfileBloc _profileBloc;
 
@@ -247,7 +249,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
 
   Widget _buildBusinessDescriptionTextField() {
     return StreamBuilder<String>(
-        stream: _profileBloc.businesDescription,
+        stream: _profileBloc.businessDescription,
         builder: (context, snapshot) {
           return TextField(
             style: TextStyles.textFieldTextStyle,
@@ -330,13 +332,27 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         });
   }
 
+  void _showSnackbar({@required String message}) {
+    final snackbar = SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(child: Text(message)),
+            Icon(Icons.info_outline, color: Theme.of(context).accentColor)
+          ],
+        ),
+        duration: new Duration(seconds: 2));
+    _scaffoldKey.currentState
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackbar);
+  }
+
   Future submitForm() async {
     if (!await PhoneNumberUtil.isValidPhoneNumber(
         phoneNumber:
             '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
         isoCode: _selectedCountryCode.code)) {
-      print('Phone number is invalid!');
-
+      _showSnackbar(message: 'Primary phone number is invalid!');
       return;
     }
 
@@ -344,40 +360,63 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         phoneNumber:
             '${_selectedCountryCode.dialCode}${_otherPhoneNumberController.text}',
         isoCode: _selectedCountryCode.code)) {
-      print('Other phone number is invalid!');
-
+      _showSnackbar(message: 'Other phone number is invalid!');
       return;
     }
 
-    // _authBloc.signOutUser();
+    ReturnType _isCreated = await _profileBloc.createProfile();
+
+    if (!_isCreated.returnType) {
+      _showSnackbar(message: _isCreated.messagTag);
+    }
   }
 
   Widget _buildActionButton() {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: RaisedButton(
-        onPressed: () => submitForm(),
-        color: Theme.of(context).accentColor,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text('Submit',
-                  style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.bold)),
-              SizedBox(width: 20.0),
-              Icon(Icons.arrow_forward_ios,
-                  size: 18.0, color: Theme.of(context).primaryColor)
-            ],
-          ),
-        ),
-      ),
-    );
+    return StreamBuilder<bool>(
+        stream: _profileBloc.validateForm,
+        builder: (context, validatorSnapshot) {
+          return StreamBuilder<ProfileState>(
+              stream: _profileBloc.profileState,
+              builder: (context, snapshot) {
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: RaisedButton(
+                    onPressed: (validatorSnapshot.hasData &&
+                            validatorSnapshot.data &&
+                            snapshot.data != ProfileState.Loading)
+                        ? () => submitForm()
+                        : null,
+                    color: Theme.of(context).accentColor,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.0)),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text('Submit',
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold)),
+                          SizedBox(width: 20.0),
+                          snapshot.data == ProfileState.Loading
+                              ? SizedBox(
+                                  height: 20.0,
+                                  width: 20.0,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2.0),
+                                )
+                              : Icon(Icons.arrow_forward_ios,
+                                  size: 18.0,
+                                  color: Theme.of(context).primaryColor)
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              });
+        });
   }
 
   @override
@@ -391,6 +430,7 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     return GestureDetector(
       onTap: _hideKeypad,
       child: Scaffold(
+        key: _scaffoldKey,
         floatingActionButton: _buildActionButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         body: SafeArea(

@@ -89,11 +89,11 @@ class AuthBloc {
     }
   }
 
-  void _resetControllers() {
-    _emailController.value = '';
-    _passwordController.value = '';
-    _confirmPasswordController.value = '';
-  }
+  // void _resetControllers() {
+  //   _emailController.value = '';
+  //   _passwordController.value = '';
+  //   _confirmPasswordController.value = '';
+  // }
 
   Future<ReturnType> authenticated() async {
     try {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:libphonenumber/libphonenumber.dart';
 
 class ProfileValidators {
   final validateFirstName = StreamTransformer<String, String>.fromHandlers(

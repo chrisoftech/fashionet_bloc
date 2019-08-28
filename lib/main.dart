@@ -70,7 +70,7 @@ class AuthDecisionPage extends StatelessWidget {
               return SplashPage();
             } else if (snapshot.data == AuthState.Authenticated) {
               _profileBloc.hasProfile();
-              return ProfileFormPage();
+              return ProfileDecisionPage();
             } else {
               return AuthPage();
             }
@@ -85,14 +85,14 @@ class ProfileDecisionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     ProfileBloc _profileBloc = ProfileProvider.of(context);
 
-    return StreamBuilder<ProfileState>(
-        stream: _profileBloc.profileState,
+    return StreamBuilder<ProfileStatus>(
+        stream: _profileBloc.profileStatus,
         builder: (context, snapshot) {
           print('Profile Descision Page ${snapshot.data.toString()}');
           if (snapshot.hasData) {
-            if (snapshot.data == ProfileState.Default) {
+            if (snapshot.data == ProfileStatus.Default) {
               return SplashPage();
-            } else if (snapshot.data == ProfileState.HasProfile) {
+            } else if (snapshot.data == ProfileStatus.HasProfile) {
               return TabPage();
             } else {
               return ProfileFormPage();
