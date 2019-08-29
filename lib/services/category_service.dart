@@ -9,7 +9,11 @@ class CategoryService {
       : _serverTimestamp = FieldValue.serverTimestamp(),
         _categoryCollection = Firestore.instance.collection('categories');
 
-  Future<DocumentReference> createdCategory(
+  Stream<QuerySnapshot> fetchCategories() {
+    return _categoryCollection.snapshots();
+  }
+
+  Future<DocumentReference> createCategory(
       {@required String userId,
       @required String title,
       @required String description}) {

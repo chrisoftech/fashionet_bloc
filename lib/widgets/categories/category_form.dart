@@ -142,7 +142,7 @@ class _CategoryFormState extends State<CategoryForm> {
     return StreamBuilder<bool>(
         stream: _categoryBloc.validateForm,
         builder: (context, validatorSnapshot) {
-          return StreamBuilder<CategoryFormState>(
+          return StreamBuilder<CategoryState>(
               stream: _categoryBloc.categoryFormState,
               builder: (context, snapshot) {
                 return Align(
@@ -150,7 +150,7 @@ class _CategoryFormState extends State<CategoryForm> {
                   child: RaisedButton(
                     onPressed: validatorSnapshot.hasData &&
                             validatorSnapshot.data &&
-                            snapshot.data != CategoryFormState.Loading
+                            snapshot.data != CategoryState.Loading
                         ? () => submitForm()
                         : null,
                     color: Theme.of(context).accentColor,
@@ -167,7 +167,7 @@ class _CategoryFormState extends State<CategoryForm> {
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold)),
                           SizedBox(width: 20.0),
-                          snapshot.data == CategoryFormState.Loading
+                          snapshot.data == CategoryState.Loading
                               ? SizedBox(
                                   height: 20.0,
                                   width: 20.0,

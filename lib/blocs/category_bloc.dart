@@ -1,22 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/repositories/category_repository.dart';
 import 'package:fashionet_bloc/validators/validators.dart';
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
-enum CategoryFormState { Default, Loading, Success, Failure }
+enum CategoryState { Default, Loading, Success, Failure }
 
 class CategoryBloc with CategoryValidators {
   final CategoryRepository _categoryRepository;
 
-  // final _titleController = BehaviorSubject<String>();
+  // final _categoriesController = BehaviorSubject<List<Category>>();
+
   final _titleController = PublishSubject<String>();
   final _descriptionController = PublishSubject<String>();
 
   // states controllers
-  final _categoryFormStateController = BehaviorSubject<CategoryFormState>();
+  final _categoryFormStateController = BehaviorSubject<CategoryState>();
+  final _categoryStateController = BehaviorSubject<CategoryState>();
 
   CategoryBloc() : _categoryRepository = CategoryRepository();
+
+  // Observable<List<Category>> get categories => _categoriesController.stream;
 
   // validators
   Observable<String> get title =>
@@ -29,30 +34,57 @@ class CategoryBloc with CategoryValidators {
       Observable.combineLatest2(title, description, (t, d) => true);
 
   // states
-  Observable<CategoryFormState> get categoryFormState =>
-      _categoryFormStateController.stream
-          .defaultIfEmpty(CategoryFormState.Default);
+  Observable<CategoryState> get categoryFormState =>
+      _categoryFormStateController.stream.defaultIfEmpty(CategoryState.Default);
+  Observable<CategoryState> get categoryState =>
+      _categoryStateController.stream.defaultIfEmpty(CategoryState.Default);
 
   // inputs
   Function(String) get onTitleChanged => _titleController.add;
   Function(String) get onDescriptionChanged => _descriptionController.add;
 
+  List<Category> _mapStreamToCategory({@required QuerySnapshot snapshot}) {
+    final List<Category> _categories = [];
+
+    for (var document in snapshot.documents) {
+      final _category = Category(
+        categoryId: document.documentID,
+        title: document.data['title'],
+        description: document.data['description'],
+        created: document.data['created'],
+        lastUpdate: document.data['lastUpdate'],
+      );
+
+      _categories.add(_category);
+    }
+
+    return _categories;
+  }
+
+  Stream<List<Category>> fetchCategories() {
+    return _categoryRepository.fetchCategories().map(
+        (QuerySnapshot snapshot) => _mapStreamToCategory(snapshot: snapshot));
+
+    //  final List<Category> _categories = _mapStreamToCategory(snapshot: snapshot);
+    //   _categoriesController.sink.add(_categories);
+  }
+
   Future<ReturnType> createCategory(
       {@required String title, @required String description}) async {
     try {
-      _categoryFormStateController.sink.add(CategoryFormState.Loading);
+      _categoryFormStateController.sink.add(CategoryState.Loading);
 
       await _categoryRepository.createCategory(
           title: title, description: description);
 
-      _categoryFormStateController.sink.add(CategoryFormState.Success);
+      _categoryFormStateController.sink.add(CategoryState.Success);
 
       return ReturnType(
           returnType: true, messagTag: 'Category created successfully');
     } catch (e) {
       print(e.toString());
 
-      _categoryFormStateController.sink.add(CategoryFormState.Failure);
+      _categoryFormStateController.sink.add(CategoryState.Failure);
       return ReturnType(
           returnType: false,
           messagTag: 'An error occured while creating category!');
@@ -60,10 +92,13 @@ class CategoryBloc with CategoryValidators {
   }
 
   void dispose() {
+    // _categoriesController?.close();
+
     _titleController?.close();
     _descriptionController?.close();
 
     _categoryFormStateController?.close();
+    _categoryStateController?.close();
 
     print('Category bloc disposed');
   }

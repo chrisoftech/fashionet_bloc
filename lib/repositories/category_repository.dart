@@ -11,13 +11,21 @@ class CategoryRepository {
       : _categoryService = CategoryService(),
         _authRepository = AuthRepository();
 
+  Stream<QuerySnapshot> fetchCategories() {
+    try {
+      return _categoryService.fetchCategories();
+    } catch (e) {
+      throw (e);
+    }
+  }
+
   Future<DocumentReference> createCategory(
       {@required String title, @required String description}) async {
     try {
       final String _currentUserId =
           (await _authRepository.authenticated())?.uid;
 
-      return _categoryService.createdCategory(
+      return _categoryService.createCategory(
           userId: _currentUserId, title: title, description: description);
     } catch (e) {
       throw (e);
