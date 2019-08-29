@@ -18,10 +18,12 @@ class _CategoryCardState extends State<CategoryCard> {
   Category get _category => widget.category;
 
   void _openCategoryForm() {
+    final _categoryForm = CategoryForm(category: _category);
+
     showDialog(
         context: context,
         builder: (context) {
-          return CategoryForm(category: _category);
+          return _categoryForm;
         });
   }
 
