@@ -102,7 +102,25 @@ class CategoryBloc with CategoryValidators {
       _categoryFormStateController.sink.add(CategoryState.Success);
 
       return ReturnType(
-          returnType: true, messagTag: 'Updated created successfully');
+          returnType: true, messagTag: 'Category updated successfully');
+    } catch (e) {
+      print(e.toString());
+
+      _categoryFormStateController.sink.add(CategoryState.Failure);
+      return ReturnType(returnType: false, messagTag: e.toString());
+    }
+  }
+
+  Future<ReturnType> deleteCategory({@required String categoryId}) async {
+    try {
+      _categoryFormStateController.sink.add(CategoryState.Loading);
+
+      await _categoryRepository.deleteCategory(categoryId: categoryId);
+
+      _categoryFormStateController.sink.add(CategoryState.Success);
+
+      return ReturnType(
+          returnType: true, messagTag: 'Category deleted successfully');
     } catch (e) {
       print(e.toString());
 

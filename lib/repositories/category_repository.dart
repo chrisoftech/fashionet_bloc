@@ -40,7 +40,15 @@ class CategoryRepository {
       return _categoryService.updateCategory(
           categoryId: categoryId, title: title, description: description);
     } catch (e) {
-      throw(e);
+      throw (e);
+    }
+  }
+
+  Future<void> deleteCategory({@required String categoryId}) {
+    try {
+      return _categoryService.deleteCategory(categoryId: categoryId);
+    } catch (e) {
+      throw (e);
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:popup_menu/popup_menu.dart';
 
@@ -27,12 +28,35 @@ class _CategoryCardState extends State<CategoryCard> {
         });
   }
 
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
+  void _openDeleteConfirmationDialog() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return CategoryDeleteDialog(category: _category);
+        }).then((_) {
+      if (_ != null && _) {
+        final _icon = Icon(Icons.verified_user, color: Colors.green);
+        final _deleteMessage = 'Category deleted successfully';
+        _showSnackbar(icon: _icon, title: 'Success', message: _deleteMessage);
+      }
+    });
+  }
+
   void _onClickMenu(MenuItemProvider item) {
-    if (item.menuTitle == 'Update') {
-      _openCategoryForm();
-    } else {
-      print('Delete Category');
-    }
+    item.menuTitle == 'Update'
+        ? _openCategoryForm()
+        : _openDeleteConfirmationDialog();
   }
 
   void _onStateChanged(bool isShow) {

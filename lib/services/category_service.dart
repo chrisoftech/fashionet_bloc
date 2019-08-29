@@ -40,4 +40,13 @@ class CategoryService {
       throw ('Operation timeout! Poor internet connection detected');
     });
   }
+
+  Future<void> deleteCategory({@required String categoryId}) {
+    return _categoryCollection
+        .document(categoryId)
+        .delete()
+        .timeout(Duration(seconds: 30), onTimeout: () {
+      throw ('Operation timeout! Poor internet connection detected');
+    });
+  }
 }
