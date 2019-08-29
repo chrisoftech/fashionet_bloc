@@ -1,11 +1,16 @@
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/models/return_type.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
 class CategoryForm extends StatefulWidget {
+  final Category category;
+
+  const CategoryForm({Key key, this.category}) : super(key: key);
+
   @override
   _CategoryFormState createState() => _CategoryFormState();
 }
@@ -13,11 +18,10 @@ class CategoryForm extends StatefulWidget {
 class _CategoryFormState extends State<CategoryForm> {
   CategoryBloc _categoryBloc;
 
-  // GlobalKey<ScaffoldState> get _scaffoldKey => widget.scaffoldKey;
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
+
+  Category get _category => widget.category;
 
   @override
   void didChangeDependencies() {
@@ -55,10 +59,15 @@ class _CategoryFormState extends State<CategoryForm> {
   }
 
   Widget _buildTitleTextField() {
+    if (_category != null) {
+      _titleController.text = _category.title;
+    }
+
     return StreamBuilder<String>(
         stream: _categoryBloc.title,
         builder: (context, snapshot) {
           return TextField(
+            autofocus: true,
             style: TextStyles.textFieldTextStyle,
             controller: _titleController,
             onChanged: _categoryBloc.onTitleChanged,
@@ -69,6 +78,10 @@ class _CategoryFormState extends State<CategoryForm> {
   }
 
   Widget _buildDescriptioneTextField() {
+    if (_category != null) {
+      _descriptionController.text = _category.description;
+    }
+
     return StreamBuilder<String>(
         stream: _categoryBloc.description,
         builder: (context, snapshot) {
@@ -123,8 +136,14 @@ class _CategoryFormState extends State<CategoryForm> {
       return;
     }
 
-    final ReturnType _isCreated = await _categoryBloc.createCategory(
-        title: _titleController.text, description: _descriptionController.text);
+    final ReturnType _isCreated = _category != null
+        ? await _categoryBloc.updateCategory(
+            categoryId: _category.categoryId,
+            title: _titleController.text,
+            description: _descriptionController.text)
+        : await _categoryBloc.createCategory(
+            title: _titleController.text,
+            description: _descriptionController.text);
 
     if (_isCreated.returnType) {
       final _icon = Icon(Icons.verified_user, color: Colors.green);
@@ -139,50 +158,42 @@ class _CategoryFormState extends State<CategoryForm> {
   }
 
   Widget _buildActionButton() {
-    return StreamBuilder<bool>(
-        stream: _categoryBloc.validateForm,
-        builder: (context, validatorSnapshot) {
-          return StreamBuilder<CategoryState>(
-              stream: _categoryBloc.categoryFormState,
-              builder: (context, snapshot) {
-                return Align(
-                  alignment: Alignment.bottomCenter,
-                  child: RaisedButton(
-                    onPressed: validatorSnapshot.hasData &&
-                            validatorSnapshot.data &&
-                            snapshot.data != CategoryState.Loading
-                        ? () => submitForm()
-                        : null,
-                    color: Theme.of(context).accentColor,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text('Submit',
-                              style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.bold)),
-                          SizedBox(width: 20.0),
-                          snapshot.data == CategoryState.Loading
-                              ? SizedBox(
-                                  height: 20.0,
-                                  width: 20.0,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2.0),
-                                )
-                              : Icon(Icons.arrow_forward_ios,
-                                  size: 18.0,
-                                  color: Theme.of(context).primaryColor)
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              });
+    return StreamBuilder<CategoryState>(
+        stream: _categoryBloc.categoryFormState,
+        builder: (context, snapshot) {
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: RaisedButton(
+              onPressed: snapshot.data != CategoryState.Loading
+                  ? () => submitForm()
+                  : null,
+              color: Theme.of(context).accentColor,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Submit',
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold)),
+                    SizedBox(width: 20.0),
+                    snapshot.data == CategoryState.Loading
+                        ? SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(strokeWidth: 2.0),
+                          )
+                        : Icon(Icons.arrow_forward_ios,
+                            size: 18.0, color: Theme.of(context).primaryColor)
+                  ],
+                ),
+              ),
+            ),
+          );
         });
   }
 
@@ -221,8 +232,6 @@ class _CategoryFormState extends State<CategoryForm> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      // elevation: 0.0,
-      // backgroundColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       child: GestureDetector(
         onTap: () => _hideKeyPad(),
@@ -230,20 +239,4 @@ class _CategoryFormState extends State<CategoryForm> {
       ),
     );
   }
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Dialog(
-  //     elevation: 0.0,
-  //     backgroundColor: Colors.transparent,
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-  //     child: GestureDetector(
-  //       onTap: () => _hideKeyPad(),
-  //       child: Scaffold(
-  //         key: _scaffoldKey,
-  //         backgroundColor: Colors.transparent,
-  //         body: _buildBody(),
-  //       ),
-  //     ),
-  //   );
-  // }
 }

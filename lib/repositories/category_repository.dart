@@ -31,4 +31,16 @@ class CategoryRepository {
       throw (e);
     }
   }
+
+  Future<void> updateCategory(
+      {@required String categoryId,
+      @required String title,
+      @required String description}) {
+    try {
+      return _categoryService.updateCategory(
+          categoryId: categoryId, title: title, description: description);
+    } catch (e) {
+      throw(e);
+    }
+  }
 }

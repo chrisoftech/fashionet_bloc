@@ -23,6 +23,21 @@ class CategoryService {
       'description': description,
       'created': _serverTimestamp,
       'lastUpdate': _serverTimestamp,
+    }).timeout(Duration(seconds: 30), onTimeout: () {
+      throw ('Operation timeout! Poor internet connection detected');
+    });
+  }
+
+  Future<void> updateCategory(
+      {@required String categoryId,
+      @required String title,
+      @required String description}) {
+    return _categoryCollection.document(categoryId).setData({
+      'title': title,
+      'description': description,
+      'lastUpdate': _serverTimestamp,
+    }).timeout(Duration(seconds: 30), onTimeout: () {
+      throw ('Operation timeout! Poor internet connection detected');
     });
   }
 }

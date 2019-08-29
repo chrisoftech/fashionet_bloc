@@ -30,8 +30,8 @@ class CategoryBloc with CategoryValidators {
       _descriptionController.stream.transform(validateDescription);
 
   // form validation
-  Observable<bool> get validateForm =>
-      Observable.combineLatest2(title, description, (t, d) => true);
+  // Observable<bool> get validateForm =>
+  //     Observable.combineLatest2(title, description, (t, d) => true);
 
   // states
   Observable<CategoryState> get categoryFormState =>
@@ -85,9 +85,29 @@ class CategoryBloc with CategoryValidators {
       print(e.toString());
 
       _categoryFormStateController.sink.add(CategoryState.Failure);
+      return ReturnType(returnType: false, messagTag: e.toString());
+    }
+  }
+
+  Future<ReturnType> updateCategory(
+      {@required String categoryId,
+      @required String title,
+      @required String description}) async {
+    try {
+      _categoryFormStateController.sink.add(CategoryState.Loading);
+
+      await _categoryRepository.updateCategory(
+          categoryId: categoryId, title: title, description: description);
+
+      _categoryFormStateController.sink.add(CategoryState.Success);
+
       return ReturnType(
-          returnType: false,
-          messagTag: 'An error occured while creating category!');
+          returnType: true, messagTag: 'Updated created successfully');
+    } catch (e) {
+      print(e.toString());
+
+      _categoryFormStateController.sink.add(CategoryState.Failure);
+      return ReturnType(returnType: false, messagTag: e.toString());
     }
   }
 

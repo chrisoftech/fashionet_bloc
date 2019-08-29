@@ -1,4 +1,5 @@
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:popup_menu/popup_menu.dart';
 
@@ -16,9 +17,17 @@ class _CategoryCardState extends State<CategoryCard> {
 
   Category get _category => widget.category;
 
+  void _openCategoryForm() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return CategoryForm(category: _category);
+        });
+  }
+
   void _onClickMenu(MenuItemProvider item) {
     if (item.menuTitle == 'Update') {
-      print('Update Category');
+      _openCategoryForm();
     } else {
       print('Delete Category');
     }
