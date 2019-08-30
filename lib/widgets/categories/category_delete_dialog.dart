@@ -52,6 +52,8 @@ class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
 
   void _showSnackbar(
       {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
+
     Flushbar(
       icon: icon,
       title: title,

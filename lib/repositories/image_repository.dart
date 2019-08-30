@@ -22,4 +22,14 @@ class ImageRepository {
       throw (e);
     }
   }
+
+  Future<List<String>> savePostImages(
+      {@required String fileLocation, @required List<Asset> assets}) async {
+    try {
+      return _imageService.savePostImages(
+          fileLocation: fileLocation, assets: assets);
+    } catch (e) {
+      throw (e);
+    }
+  }
 }

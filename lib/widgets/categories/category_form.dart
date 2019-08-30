@@ -114,12 +114,12 @@ class _CategoryFormState extends State<CategoryForm> {
     _titleController.clear();
     _descriptionController.clear();
 
-    // reset stream controllers
-    _categoryBloc.onTitleChanged('');
-    _categoryBloc.onDescriptionChanged('');
+    // // reset stream controllers
+    // _categoryBloc.onTitleChanged('');
+    // _categoryBloc.onDescriptionChanged('');
   }
 
-  void submitForm() async {
+  void _submitForm() async {
     _hideKeyPad();
 
     if (_titleController.text.isEmpty) {
@@ -167,7 +167,7 @@ class _CategoryFormState extends State<CategoryForm> {
             alignment: Alignment.bottomCenter,
             child: RaisedButton(
               onPressed: snapshot.data != CategoryState.Loading
-                  ? () => submitForm()
+                  ? () => _submitForm()
                   : null,
               color: Theme.of(context).accentColor,
               shape: RoundedRectangleBorder(
