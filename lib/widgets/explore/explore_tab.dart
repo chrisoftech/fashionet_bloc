@@ -1,3 +1,6 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +14,15 @@ class ExploreTab extends StatefulWidget {
 }
 
 class _ExploreTabState extends State<ExploreTab> {
+  CategoryBloc _categoryBloc;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _categoryBloc = CategoryProvider.of(context);
+  }
+
   ScrollController get _scrollController => widget.scrollController;
 
   Widget _buildFlexibleSpaceBarTitle() {
@@ -91,28 +103,82 @@ class _ExploreTabState extends State<ExploreTab> {
     );
   }
 
+  Widget _buildNoCategory() {
+    final double _deviceWidth = MediaQuery.of(context).size.width;
+    final double _contentMaxWidth =
+        _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .80;
+
+    final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+
+    return Container(
+      alignment: Alignment(0.0, 0.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.category,
+            size: 70.0,
+            color: Theme.of(context).primaryColor,
+          ),
+          Text(
+            'No categories yet',
+            style: Theme.of(context).textTheme.display1.copyWith(
+                color: Theme.of(context).primaryColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: 10.0, horizontal: _contentPadding),
+            child: Text(
+              'Add categories in Fashionet so you can easily find them here',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.display1.copyWith(
+                  color: Theme.of(context).primaryColor, fontSize: 15.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCategories() {
     return SliverToBoxAdapter(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _buildSectionLabel(label: 'Categories'),
-        Container(
-          height: 100.0,
-          child: ListView.builder(
-            itemCount: 10,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) {
-              return Row(
-                children: <Widget>[
-                  index == 0 ? SizedBox(width: 20.0) : Container(),
-                  CategoryLabel(),
-                  SizedBox(width: 10.0),
-                ],
-              );
-            },
-          ),
-        ),
+        StreamBuilder<List<Category>>(
+            stream: _categoryBloc.fetchCategories(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                    child: CircularProgressIndicator(strokeWidth: 2.0));
+              }
+
+              final List<Category> _categories = snapshot.data;
+
+              return _categories.length == 0
+                  ? _buildNoCategory()
+                  : Container(
+                      height: 100.0,
+                      child: ListView.builder(
+                        itemCount: _categories.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (context, index) {
+                          final Category _category = _categories[index];
+
+                          return Row(
+                            children: <Widget>[
+                              index == 0 ? SizedBox(width: 20.0) : Container(),
+                              CategoryLabel(category: _category),
+                              SizedBox(width: 10.0),
+                            ],
+                          );
+                        },
+                      ),
+                    );
+            }),
       ],
     ));
   }
