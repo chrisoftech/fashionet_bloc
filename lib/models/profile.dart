@@ -7,9 +7,10 @@ class Profile {
   final String businessName;
   final String businessDescription;
   final String businessLocation;
+  final String dialCode;
   final String phoneNumber;
   final String otherPhoneNumber;
-  final String profileImageUrl;
+  final String imageUrl;
   final dynamic created;
   final dynamic lastUpdate;
   // final bool isFollowing;
@@ -22,9 +23,10 @@ class Profile {
     @required this.businessName,
     @required this.businessDescription,
     @required this.businessLocation,
+    @required this.dialCode,
     @required this.phoneNumber,
     @required this.otherPhoneNumber,
-    @required this.profileImageUrl,
+    @required this.imageUrl,
     @required this.created,
     @required this.lastUpdate,
     // this.isFollowing = false,
@@ -38,9 +40,10 @@ class Profile {
     String businessName,
     String businessDescription,
     String businessLocation,
+    String dialCode,
     String phoneNumber,
     String otherPhoneNumber,
-    String profileImageUrl,
+    String imageUrl,
     dynamic created,
     dynamic lastUpdate,
     // bool isFollowing,
@@ -53,9 +56,10 @@ class Profile {
       businessName: businessName ?? this.businessName,
       businessDescription: businessDescription ?? this.businessDescription,
       businessLocation: businessLocation ?? this.businessLocation,
+      dialCode: dialCode ?? this.dialCode,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       otherPhoneNumber: otherPhoneNumber ?? this.otherPhoneNumber,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      imageUrl: imageUrl ?? this.imageUrl,
       created: created ?? this.created,
       lastUpdate: lastUpdate ?? this.lastUpdate,
       // isFollowing: isFollowing ?? this.isFollowing,

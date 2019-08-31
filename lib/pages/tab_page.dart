@@ -1,4 +1,8 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -9,6 +13,8 @@ class TabPage extends StatefulWidget {
 
 class _TabPageState extends State<TabPage> {
   int _activeTabIndex = 0;
+
+  PostBloc _postBloc;
 
   final PanelController _panelController = PanelController();
 
@@ -22,6 +28,13 @@ class _TabPageState extends State<TabPage> {
 
     _scrollController = ScrollController();
     _libraryTabScrollController = ScrollController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _postBloc = PostProvider.of(context);
   }
 
   @override
@@ -69,8 +82,31 @@ class _TabPageState extends State<TabPage> {
     );
   }
 
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
+
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
+  void _fetchPosts() async {
+    final ReturnType _response = await _postBloc.fetchPosts();
+
+    if (!_response.returnType) {
+      final _icon = Icon(Icons.error_outline, color: Colors.red);
+      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+    }
+  }
+
   Widget _buildTabBody() {
     if (_activeTabIndex == 1) {
+      _fetchPosts(); // fetch posts
       return ExploreTab(scrollController: _scrollController);
     } else if (_activeTabIndex == 2) {
       return LibraryTab(

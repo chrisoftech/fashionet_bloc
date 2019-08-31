@@ -9,6 +9,12 @@ class PostService {
       : _postCollection = Firestore.instance.collection('posts'),
         _serverTimestamp = FieldValue.serverTimestamp();
 
+  Future<QuerySnapshot> fetchPosts() {
+    return _postCollection
+        .orderBy('lastUpdate', descending: true)
+        .getDocuments();
+  }
+
   Future<DocumentReference> createPost(
       {@required List<String> imageUrls,
       @required String userId,

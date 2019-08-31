@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/repositories/repositories.dart';
 import 'package:fashionet_bloc/services/services.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,30 @@ class ProfileRepository {
           (await _authRepository.authenticated())?.uid;
 
       return _profileService.hasProfile(userId: _currentUserId);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<Profile> fetchProfile({@required String userId}) async {
+    try {
+      DocumentSnapshot _document =
+          await _profileService.fetchProfile(userId: userId);
+
+      return Profile(
+        userId: _document.documentID,
+        firstName: _document.data['firstname'],
+        lastName: _document.data['lastname'],
+        businessName: _document.data['businessName'],
+        businessDescription: _document.data['businessDescription'],
+        dialCode: _document.data['dialCode'],
+        phoneNumber: _document.data['phoneNumber'],
+        otherPhoneNumber: _document.data['otherPhoneNumber'],
+        businessLocation: _document.data['location'],
+        imageUrl: _document.data['imageUrl'],
+        created: _document.data['created'],
+        lastUpdate: _document.data['lastUpdate'],
+      );
     } catch (e) {
       throw (e);
     }

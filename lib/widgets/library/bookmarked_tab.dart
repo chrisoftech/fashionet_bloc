@@ -49,7 +49,7 @@ class BookmarkedTab extends StatelessWidget {
           children: <Widget>[
             index == 0 ? SizedBox(height: 20.0) : Container(),
             PostCardSmall(),
-            SizedBox(height: 20.0),
+            index == 9 ? SizedBox(height: 130.0) : SizedBox(height: 20.0),
           ],
         );
       },

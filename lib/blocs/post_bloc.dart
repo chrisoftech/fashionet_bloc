@@ -11,10 +11,25 @@ class PostBloc {
 
   final _postStateController = BehaviorSubject<PostState>();
 
+  final _postsController = BehaviorSubject<List<Post>>();
+
   PostBloc() : _postRepository = PostRepository();
 
   Observable<PostState> get postState =>
       _postStateController.stream.defaultIfEmpty(PostState.Default);
+  Observable<List<Post>> get posts => _postsController.stream;
+
+  Future<ReturnType> fetchPosts() async {
+    try {
+      final List<Post> _posts = await _postRepository.fetchPosts();
+      _postsController.sink.add(_posts);
+
+      return ReturnType(
+          returnType: true, messagTag: 'Posts loaded successfully');
+    } catch (e) {
+      return ReturnType(returnType: true, messagTag: e.toString());
+    }
+  }
 
   Future<ReturnType> createPost(
       {@required List<Asset> assets,
@@ -48,5 +63,6 @@ class PostBloc {
 
   void dispose() {
     _postStateController?.close();
+    _postsController?.close();
   }
 }

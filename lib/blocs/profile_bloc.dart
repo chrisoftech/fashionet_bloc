@@ -108,7 +108,7 @@ class ProfileBloc with ProfileValidators {
             phoneNumber: snapshot.data['phoneNumber'],
             otherPhoneNumber: snapshot.data['otherPhoneNumber'],
             businessLocation: snapshot.data['businessLocation'],
-            profileImageUrl: snapshot.data['imageUrl'],
+            imageUrl: snapshot.data['imageUrl'],
             created: snapshot.data['created'],
             lastUpdate: snapshot.data['lastUpdate'],
           );

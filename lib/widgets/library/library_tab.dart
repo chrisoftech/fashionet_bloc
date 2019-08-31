@@ -146,7 +146,10 @@ class _LibraryTabState extends State<LibraryTab>
   Widget build(BuildContext context) {
     return CustomScrollView(
       controller: _scrollController,
-      slivers: <Widget>[_buildSliverAppBar(), _buildTabBarView()],
+      slivers: <Widget>[
+        _buildSliverAppBar(),
+        _buildTabBarView(),
+      ],
     );
   }
 }

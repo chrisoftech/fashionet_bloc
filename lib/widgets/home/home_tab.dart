@@ -226,7 +226,8 @@ class _HomeTabState extends State<HomeTab> {
         _buildSliverAppBar(),
         SliverToBoxAdapter(child: PageIndicator()),
         _buildLatestPosts(),
-        _buildSuggestedPosts(contentPadding: _contentPadding)
+        _buildSuggestedPosts(contentPadding: _contentPadding),
+        SliverToBoxAdapter(child: SizedBox(height: 130.0)),
       ],
     );
   }
