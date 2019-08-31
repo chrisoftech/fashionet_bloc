@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -17,9 +21,47 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   bool _isFollowing = false;
   bool _isBookmarked = false;
 
+  PostBloc _postBloc;
+  PostItemBloc _postItemBloc;
+  StreamSubscription _subscription;
+
   int _currentPostImageIndex = 0;
 
   Post get _post => widget.post;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _initBloc();
+  }
+
+  @override
+  void didUpdateWidget(PostCardDefault oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    _disposeBloc();
+    _initBloc();
+  }
+
+  @override
+  void dispose() {
+    _disposeBloc();
+    super.dispose();
+  }
+
+  void _initBloc() {
+    _postBloc = PostProvider.of(context);
+    _postItemBloc = PostItemBloc(post: _post);
+
+    _subscription =
+        _postBloc.bookmarkedPosts.listen(_postItemBloc.bookmarkedPosts);
+  }
+
+  void _disposeBloc() {
+    _subscription?.cancel();
+    _postItemBloc?.dispose();
+  }
 
   Widget _buildActivePostImage() {
     return Container(
@@ -286,22 +328,34 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         title: Text('${_post.title}',
             style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('${_post.description}', overflow: TextOverflow.ellipsis),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            InkWell(
-              onTap: () {},
-              child: Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: Icon(
-                  _post.isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                  color: Theme.of(context).accentColor,
-                ),
-              ),
-            ),
-            // _buildActionMenu()
-          ],
-        ));
+        trailing: StreamBuilder<bool>(
+            initialData: false,
+            stream: _postItemBloc.isBookmarked,
+            builder: (context, snapshot) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                    onTap: () {
+                      print(snapshot.data);
+                      if (!snapshot.data) {
+                        _postBloc.addToBookmarks(post: _post);
+                      } else {
+                        _postBloc.removeFromBookmarks(post: _post);
+                      }
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Icon(
+                        snapshot.data ? Icons.bookmark : Icons.bookmark_border,
+                        color: Theme.of(context).accentColor,
+                      ),
+                    ),
+                  ),
+                  // _buildActionMenu()
+                ],
+              );
+            }));
   }
 
   Widget _buildPostDetails() {

@@ -105,6 +105,7 @@ class ProfileBloc with ProfileValidators {
             lastName: snapshot.data['lastName'],
             businessName: snapshot.data['businessName'],
             businessDescription: snapshot.data['businessDescription'],
+            dialCode: snapshot.data['dialCode'],
             phoneNumber: snapshot.data['phoneNumber'],
             otherPhoneNumber: snapshot.data['otherPhoneNumber'],
             businessLocation: snapshot.data['businessLocation'],

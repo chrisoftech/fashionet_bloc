@@ -10,14 +10,37 @@ class PostBloc {
   final PostRepository _postRepository;
 
   final _postStateController = BehaviorSubject<PostState>();
-
-  final _postsController = BehaviorSubject<List<Post>>();
-
-  PostBloc() : _postRepository = PostRepository();
-
   Observable<PostState> get postState =>
       _postStateController.stream.defaultIfEmpty(PostState.Default);
+
+  // List of all items, part of the bookmarked posts
+  Set<Post> _bookmarkedPosts = Set<Post>();
+
+  // List of all posts
+  final _postsController = BehaviorSubject<List<Post>>();
   Observable<List<Post>> get posts => _postsController.stream;
+
+  final _bookmarkedPostsController = BehaviorSubject<List<Post>>();
+  Observable<List<Post>> get bookmarkedPosts =>
+      _bookmarkedPostsController.stream;
+
+  PostBloc() : _postRepository = PostRepository() {
+    fetchPosts();
+  }
+
+  void _postActionOnBookmarks() {
+    _bookmarkedPostsController.add(_bookmarkedPosts.toList());
+  }
+
+  void addToBookmarks({@required Post post}) {
+    _bookmarkedPosts.add(post);
+    _postActionOnBookmarks();
+  }
+
+  void removeFromBookmarks({@required Post post}) {
+    _bookmarkedPosts.remove(post);
+    _postActionOnBookmarks();
+  }
 
   Future<ReturnType> fetchPosts() async {
     try {
@@ -64,5 +87,6 @@ class PostBloc {
   void dispose() {
     _postStateController?.close();
     _postsController?.close();
+    _bookmarkedPostsController?.close();
   }
 }
