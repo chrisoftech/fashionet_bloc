@@ -17,11 +17,11 @@ class ExploreTab extends StatefulWidget {
 class _ExploreTabState extends State<ExploreTab> {
   CategoryBloc _categoryBloc;
 
-  // final _scrollController = ScrollController();
+  final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
   PostBloc _postBloc;
 
-  ScrollController get _scrollController => widget.scrollController;
+  // ScrollController get _scrollController => widget.scrollController;
 
   @override
   void initState() {
@@ -257,32 +257,6 @@ class _ExploreTabState extends State<ExploreTab> {
     );
   }
 
-  // Widget _buildPostFeed({@required List<Post> posts, @required PostState state}) {
-  //   return SliverList(
-  //     delegate: SliverChildBuilderDelegate((context, index) {
-  //       final Post _post = posts[index];
-
-  //       return PostCardDefault(post: _post);
-  //     }, childCount:  state.hasReachedMax
-  //               ? state.posts.length
-  //               : state.posts.length + 1),
-  //   );
-  // }
-
-  // Widget _buildSliverDynamicContent(
-  //     {@required AsyncSnapshot<List<Post>> snapshot}) {
-  //   if (!snapshot.hasData) {
-  //     return _buildLoadingIndicator();
-  //   } else {
-  //     final List<Post> _posts = snapshot.data;
-
-  //     if (_posts.isEmpty) {
-  //       return _buildNoPosts();
-  //     }
-
-  //     return _buildPostFeed(posts: _posts);
-  //   }
-  // }
   Widget _buildSliverDynamicContent({@required PostState state}) {
     if (state is PostUninitialized) {
       return _buildLoadingIndicator();

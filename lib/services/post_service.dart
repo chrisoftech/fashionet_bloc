@@ -16,6 +16,10 @@ class PostService {
   //       .getDocuments();
   // }
 
+  Future<DocumentSnapshot> fetchPost({@required String postId}) {
+    return _postCollection.document(postId).get();
+  }
+
   Future<QuerySnapshot> fetchPosts({@required Post lastVisible}) {
     return lastVisible == null
         ? _postCollection

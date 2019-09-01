@@ -14,7 +14,7 @@ class TabPage extends StatefulWidget {
 class _TabPageState extends State<TabPage> {
   int _activeTabIndex = 0;
 
-  PostFormBloc _postBloc;
+  // BookmarkBloc _bookmarkBloc;
 
   final PanelController _panelController = PanelController();
 
@@ -27,14 +27,14 @@ class _TabPageState extends State<TabPage> {
     super.initState();
 
     _scrollController = ScrollController();
-    _libraryTabScrollController = ScrollController();
+    _libraryTabScrollController = ScrollController();    
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _postBloc = PostFormProvider.of(context);
+    // _bookmarkBloc = BookmarkProvider.of(context);
   }
 
   @override
@@ -60,6 +60,29 @@ class _TabPageState extends State<TabPage> {
   //   return _scrollController.position.pixels >= _scrollThreshold ? true : false;
   // }
 
+  
+  // void _showSnackbar(
+  //     {@required Icon icon, @required String title, @required String message}) {
+  //   if (!mounted) return;
+
+  //   Flushbar(
+  //     icon: icon,
+  //     title: title,
+  //     message: message,
+  //     flushbarStyle: FlushbarStyle.FLOATING,
+  //     duration: Duration(seconds: 3),
+  //   )..show(context);
+  // }
+
+  // void _fetchBookmarks() async {
+  //   final ReturnType _response = await _bookmarkBloc.fetchBookmarks();
+
+  //   if (!_response.returnType) {
+  //     final _icon = Icon(Icons.error_outline, color: Colors.red);
+  //     _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+  //   }
+  // }
+
   Widget _builScrollToTopFAB() {
     return Material(
       elevation: 8.0,
@@ -82,31 +105,8 @@ class _TabPageState extends State<TabPage> {
     );
   }
 
-  // void _showSnackbar(
-  //     {@required Icon icon, @required String title, @required String message}) {
-  //   if (!mounted) return;
-
-  //   Flushbar(
-  //     icon: icon,
-  //     title: title,
-  //     message: message,
-  //     flushbarStyle: FlushbarStyle.FLOATING,
-  //     duration: Duration(seconds: 3),
-  //   )..show(context);
-  // }
-
-  // void _fetchPosts() async {
-  //   final ReturnType _response = await _postBloc.fetchPosts();
-
-  //   if (!_response.returnType) {
-  //     final _icon = Icon(Icons.error_outline, color: Colors.red);
-  //     _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
-  //   }
-  // }
-
   Widget _buildTabBody() {
     if (_activeTabIndex == 1) {
-      // _fetchPosts(); // fetch posts
       return ExploreTab(scrollController: _scrollController);
     } else if (_activeTabIndex == 2) {
       return LibraryTab(

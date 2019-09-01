@@ -13,10 +13,27 @@ class BookmarkBloc {
   Observable<List<Post>> get bookmarkedPosts =>
       _bookmarkedPostsController.stream;
 
-  BookmarkBloc() : _bookmarkRepository = BookmarkRepository();
+  BookmarkBloc() : _bookmarkRepository = BookmarkRepository() {
+    fetchBookmarks();
+  }
 
   void _postActionOnBookmarks() {
     _bookmarkedPostsController.sink.add(_bookmarkedPosts.toList());
+  }
+
+  Future<ReturnType> fetchBookmarks() async {
+    try {
+      final List<Post> _posts = await _bookmarkRepository.fetchBookmarks();
+      _bookmarkedPosts.addAll(_posts);
+      _postActionOnBookmarks();
+
+      return ReturnType(
+          returnType: true, messagTag: 'Bookmarks successfully loaded');
+    } catch (e) {
+      return ReturnType(
+          returnType: false,
+          messagTag: 'Something went wrong when fetching bookmarks');
+    }
   }
 
   Future<ReturnType> addToBookmarks({@required Post post}) async {
@@ -30,7 +47,6 @@ class BookmarkBloc {
           returnType: true,
           messagTag: '${post.title} has been saved in bookmarks');
     } catch (e) {
-
       // reverse changes if error occurs
       _bookmarkedPosts.add(post);
       _postActionOnBookmarks();
@@ -52,7 +68,6 @@ class BookmarkBloc {
           returnType: true,
           messagTag: '${post.title} has been removed from bookmarks');
     } catch (e) {
-
       // reverse changes if error occurs
       _bookmarkedPosts.add(post);
       _postActionOnBookmarks();

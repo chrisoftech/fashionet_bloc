@@ -62,22 +62,38 @@ class PostRepository {
     return _posts;
   }
 
-  // Future<List<Post>> fetchPosts() async {
-  //   try {
-  //     final QuerySnapshot _snapshot = await _postService.fetchPosts();
+  Future<Post> fetchPost({@required String postId}) async {
+    try {
+      final DocumentSnapshot _document =
+          await _postService.fetchPost(postId: postId);
+      final String _postUserId = _document.data['userId'];
+      final Profile _postProfile =
+          await _profileRepository.fetchProfile(userId: _postUserId);
 
-  //     return _mapStreamToPosts(querySnapshot: _snapshot);
-  //   } catch (e) {
-  //     throw (e);
-  //   }
-  // }
+      return Post(
+        postId: _document.documentID,
+        userId: _document.data['userId'],
+        title: _document.data['title'],
+        description: _document.data['description'],
+        price: _document.data['price'],
+        isAvailable: _document.data['isAvailable'],
+        imageUrls: _document.data['imageUrls'],
+        categories: _document.data['category'],
+        created: _document.data['created'],
+        lastUpdate: _document.data['lastUpdate'],
+        profile: _postProfile,
+      );
+    } catch (e) {
+      throw (e);
+    }
+  }
 
   Future<List<Post>> fetchPosts({@required Post lastVisible}) async {
     try {
       QuerySnapshot _snapshot =
           await _postService.fetchPosts(lastVisible: lastVisible);
 
-     return _mapSnapshotToPosts(querySnapshot: _snapshot);
+      return _mapSnapshotToPosts(querySnapshot: _snapshot);
     } catch (e) {
       throw (e);
     }
