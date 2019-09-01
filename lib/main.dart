@@ -8,7 +8,7 @@ import 'providers/providers.dart';
 void main() => runApp(
       AuthProvider(
         child: ProfileProvider(
-          child: PostProvider(child: CategoryProvider(child: MyApp())),
+          child: PostProvider(child: BookmarkProvider(child: CategoryProvider(child: MyApp()))),
         ),
       ),
     );
@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
   AuthBloc _authBloc;
   ProfileBloc _profileBloc;
   PostBloc _postBloc;
+  BookmarkBloc _bookmarkBloc;
   CategoryBloc _categoryBloc;
 
   @override
@@ -30,6 +31,7 @@ class _MyAppState extends State<MyApp> {
     _authBloc = AuthProvider.of(context);
     _profileBloc = ProfileProvider.of(context);
     _postBloc = PostProvider.of(context);
+    _bookmarkBloc = BookmarkProvider.of(context);
     _categoryBloc = CategoryProvider.of(context);
   }
 
@@ -39,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     _authBloc.dispose();
     _profileBloc.dispose();
     _postBloc.dispose();
+    _bookmarkBloc.dispose();
     _categoryBloc.dispose();
   }
 

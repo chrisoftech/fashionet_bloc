@@ -21,7 +21,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   bool _isFollowing = false;
   bool _isBookmarked = false;
 
-  PostBloc _postBloc;
+  BookmarkBloc _bookmarkBloc;
   PostItemBloc _postItemBloc;
   StreamSubscription _subscription;
 
@@ -51,11 +51,11 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   }
 
   void _initBloc() {
-    _postBloc = PostProvider.of(context);
+    _bookmarkBloc = BookmarkProvider.of(context);
     _postItemBloc = PostItemBloc(post: _post);
 
     _subscription =
-        _postBloc.bookmarkedPosts.listen(_postItemBloc.bookmarkedPosts);
+        _bookmarkBloc.bookmarkedPosts.listen(_postItemBloc.bookmarkedPosts);
   }
 
   void _disposeBloc() {
@@ -339,9 +339,9 @@ class _PostCardDefaultState extends State<PostCardDefault> {
                     onTap: () {
                       print(snapshot.data);
                       if (!snapshot.data) {
-                        _postBloc.addToBookmarks(post: _post);
+                        _bookmarkBloc.addToBookmarks(post: _post);
                       } else {
-                        _postBloc.removeFromBookmarks(post: _post);
+                        _bookmarkBloc.removeFromBookmarks(post: _post);
                       }
                     },
                     child: Padding(
