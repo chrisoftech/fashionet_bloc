@@ -1,70 +1,116 @@
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:equatable/equatable.dart';
+import 'package:bloc/bloc.dart';
 import 'package:fashionet_bloc/repositories/repositories.dart';
 import 'package:meta/meta.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:rxdart/rxdart.dart';
 
-enum PostState { Default, Loading, Success, Failure }
+// Post States
+abstract class PostState extends Equatable {
+  PostState([List props = const []]) : super(props);
+}
 
-class PostBloc {
+class PostUninitialized extends PostState {
+  @override
+  String toString() => 'PostUninitialized';
+}
+
+class PostLoaded extends PostState {
+  final List<Post> posts;
+  final bool hasReachedMax;
+
+  PostLoaded({@required this.posts, @required this.hasReachedMax})
+      : super([posts, hasReachedMax]);
+
+  PostLoaded copyWith({List<Post> posts, bool hasReachedMax}) {
+    return PostLoaded(
+        posts: posts ?? this.posts,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax);
+  }
+
+  @override
+  String toString() =>
+      'PostLoaded { posts: ${posts.length},  hasReachedMax: $hasReachedMax }';
+}
+
+class PostError extends PostState {
+  final String error;
+
+  PostError({this.error}) : super([error]);
+
+  @override
+  String toString() => 'PostError { error: $error }';
+}
+
+// Post Events
+abstract class PostEvent extends Equatable {}
+
+class FetchPosts extends PostEvent {
+  @override
+  String toString() => 'FetchPosts';
+}
+
+// Post Bloc
+class PostBloc extends Bloc<PostEvent, PostState> {
   final PostRepository _postRepository;
 
-  final _postStateController = BehaviorSubject<PostState>();
-  Observable<PostState> get postState =>
-      _postStateController.stream.defaultIfEmpty(PostState.Default);
+  PostBloc() : _postRepository = PostRepository();
 
-  // List of all posts
-  final _postsController = BehaviorSubject<List<Post>>();
-  Observable<List<Post>> get posts => _postsController.stream;
-
-  PostBloc() : _postRepository = PostRepository() {
-    fetchPosts();
+  @override
+  Stream<PostState> transformEvents(
+    Stream<PostEvent> events,
+    Stream<PostState> Function(PostEvent event) next,
+  ) {
+    return super.transformEvents(
+      (events as Observable<PostEvent>).debounceTime(
+        Duration(milliseconds: 500),
+      ),
+      next,
+    );
   }
 
-  Future<ReturnType> fetchPosts() async {
-    try {
-      final List<Post> _posts = await _postRepository.fetchPosts();
-      _postsController.sink.add(_posts);
+  @override
+  PostState get initialState => PostUninitialized();
 
-      return ReturnType(
-          returnType: true, messagTag: 'Posts loaded successfully');
-    } catch (e) {
-      return ReturnType(returnType: true, messagTag: e.toString());
+  void onFetchPosts() {
+    dispatch(FetchPosts());
+  }
+
+  @override
+  Stream<PostState> mapEventToState(PostEvent event) async* {
+    bool _hasReachedMax(PostState state) =>
+        state is PostLoaded && state.hasReachedMax;
+
+    if (event is FetchPosts && !_hasReachedMax(currentState)) {
+      try {
+        if (currentState is PostUninitialized) {
+          List<Post> posts = await _postRepository.fetchPosts(lastVisible: null);
+
+
+          yield PostLoaded(
+              posts: posts,  hasReachedMax: false);
+          return;
+        }
+
+        if (currentState is PostLoaded) {
+          final List<Post> currentPosts = (currentState as PostLoaded).posts;
+
+          final Post lastVisible = currentPosts[currentPosts.length - 1];
+
+          List<Post> posts =
+              await _postRepository.fetchPosts(lastVisible: lastVisible);
+
+
+          yield posts.isEmpty
+              ? (currentState as PostLoaded).copyWith(hasReachedMax: true)
+              : PostLoaded(
+                  posts: (currentState as PostLoaded).posts + posts,
+                  hasReachedMax: false);
+        }
+      } catch (e) {
+        print(e.toString());
+        yield PostError(error: e.toString());
+      }
     }
-  }
-
-  Future<ReturnType> createPost(
-      {@required List<Asset> assets,
-      @required String title,
-      @required String description,
-      @required double price,
-      @required bool isAvailable,
-      @required List<String> categories}) async {
-    try {
-      _postStateController.sink.add(PostState.Loading);
-
-      await _postRepository.createPost(
-        assets: assets,
-        title: title,
-        description: description,
-        price: price,
-        isAvailable: isAvailable,
-        categories: categories,
-      );
-
-      _postStateController.sink.add(PostState.Success);
-
-      return ReturnType(returnType: true, messagTag: 'Ad posted successfully');
-    } catch (e) {
-      print(e.toString());
-
-      _postStateController.sink.add(PostState.Failure);
-      return ReturnType(returnType: true, messagTag: e.toString());
-    }
-  }
-
-  void dispose() {
-    _postStateController?.close();
-    _postsController?.close();
   }
 }

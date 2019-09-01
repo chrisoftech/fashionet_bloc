@@ -14,7 +14,7 @@ class PostForm extends StatefulWidget {
 }
 
 class _PostFormState extends State<PostForm> {
-  PostBloc _postBloc;
+  PostFormBloc _postFormBloc;
   CategoryBloc _categoryBloc;
 
   final ScrollController _scrollController = ScrollController();
@@ -40,7 +40,7 @@ class _PostFormState extends State<PostForm> {
     super.didChangeDependencies();
 
     _categoryBloc = CategoryProvider.of(context);
-    _postBloc = PostProvider.of(context);
+    _postFormBloc = PostFormProvider.of(context);
   }
 
   void _hideKeyPad() {
@@ -633,7 +633,7 @@ class _PostFormState extends State<PostForm> {
       return;
     }
 
-    final ReturnType _isCreated = await _postBloc.createPost(
+    final ReturnType _isCreated = await _postFormBloc.createPost(
       assets: _images,
       title: _titleController.text,
       description: _descriptionController.text,
@@ -656,11 +656,11 @@ class _PostFormState extends State<PostForm> {
   }
 
   Widget _buildCustomSavePostFAB() {
-    return StreamBuilder<PostState>(
-        stream: _postBloc.postState,
+    return StreamBuilder<PostFormState>(
+        stream: _postFormBloc.postFormState,
         builder: (context, snapshot) {
           final double _buttonWidth =
-              snapshot.data == PostState.Loading ? 50.0 : 150.0;
+              snapshot.data == PostFormState.Loading ? 50.0 : 150.0;
 
           return Align(
             alignment: Alignment.bottomCenter,
@@ -672,7 +672,7 @@ class _PostFormState extends State<PostForm> {
                   color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.circular(25.0),
                   child: InkWell(
-                    onTap: snapshot.data == PostState.Loading
+                    onTap: snapshot.data == PostFormState.Loading
                         ? null
                         : () => _submitForm(),
                     splashColor: Colors.black38,
@@ -685,7 +685,7 @@ class _PostFormState extends State<PostForm> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25.0),
                       ),
-                      child: snapshot.data == PostState.Loading
+                      child: snapshot.data == PostFormState.Loading
                           ? SizedBox(
                               height: 20.0,
                               width: 20.0,

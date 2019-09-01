@@ -14,7 +14,7 @@ class TabPage extends StatefulWidget {
 class _TabPageState extends State<TabPage> {
   int _activeTabIndex = 0;
 
-  PostBloc _postBloc;
+  PostFormBloc _postBloc;
 
   final PanelController _panelController = PanelController();
 
@@ -34,7 +34,7 @@ class _TabPageState extends State<TabPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _postBloc = PostProvider.of(context);
+    _postBloc = PostFormProvider.of(context);
   }
 
   @override

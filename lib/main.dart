@@ -1,17 +1,31 @@
+import 'package:bloc/bloc.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popup_menu/popup_menu.dart';
 
 import 'blocs/blocs.dart';
 import 'providers/providers.dart';
 
-void main() => runApp(
-      AuthProvider(
-        child: ProfileProvider(
-          child: PostProvider(child: BookmarkProvider(child: CategoryProvider(child: MyApp()))),
-        ),
+class SimpleBlocDelegate extends BlocDelegate {
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    super.onTransition(bloc, transition);
+    print(transition);
+  }
+}
+
+void main() {
+   BlocSupervisor.delegate = SimpleBlocDelegate();
+  runApp(
+    AuthProvider(
+      child: ProfileProvider(
+        child: PostFormProvider(
+            child: BookmarkProvider(child: CategoryProvider(child: MyApp()))),
       ),
-    );
+    ),
+  );
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -21,7 +35,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   AuthBloc _authBloc;
   ProfileBloc _profileBloc;
-  PostBloc _postBloc;
+  PostFormBloc _postFormBloc;
   BookmarkBloc _bookmarkBloc;
   CategoryBloc _categoryBloc;
 
@@ -30,7 +44,7 @@ class _MyAppState extends State<MyApp> {
     super.didChangeDependencies();
     _authBloc = AuthProvider.of(context);
     _profileBloc = ProfileProvider.of(context);
-    _postBloc = PostProvider.of(context);
+    _postFormBloc = PostFormProvider.of(context);
     _bookmarkBloc = BookmarkProvider.of(context);
     _categoryBloc = CategoryProvider.of(context);
   }
@@ -40,7 +54,7 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
     _authBloc.dispose();
     _profileBloc.dispose();
-    _postBloc.dispose();
+    _postFormBloc.dispose();
     _bookmarkBloc.dispose();
     _categoryBloc.dispose();
   }
@@ -102,7 +116,10 @@ class ProfileDecisionPage extends StatelessWidget {
             if (snapshot.data == ProfileStatus.Default) {
               return SplashPage();
             } else if (snapshot.data == ProfileStatus.HasProfile) {
-              return TabPage();
+              return BlocProvider(
+                builder: (context) => PostBloc()..onFetchPosts(),
+                child: TabPage(),
+              );
             } else {
               return ProfileFormPage();
             }

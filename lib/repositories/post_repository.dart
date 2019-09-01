@@ -32,8 +32,10 @@ class PostRepository {
     }
   }
 
-  Future<List<Post>> _mapStreamToPosts({QuerySnapshot querySnapshot}) async {
+  Future<List<Post>> _mapSnapshotToPosts({QuerySnapshot querySnapshot}) async {
     final List<Post> _posts = [];
+
+    if (querySnapshot.documents.length < 1) return _posts;
 
     for (var document in querySnapshot.documents) {
       final String _postUserId = document.data['userId'];
@@ -60,11 +62,22 @@ class PostRepository {
     return _posts;
   }
 
-  Future<List<Post>> fetchPosts() async {
-    try {
-      final QuerySnapshot _snapshot = await _postService.fetchPosts();
+  // Future<List<Post>> fetchPosts() async {
+  //   try {
+  //     final QuerySnapshot _snapshot = await _postService.fetchPosts();
 
-      return _mapStreamToPosts(querySnapshot: _snapshot);
+  //     return _mapStreamToPosts(querySnapshot: _snapshot);
+  //   } catch (e) {
+  //     throw (e);
+  //   }
+  // }
+
+  Future<List<Post>> fetchPosts({@required Post lastVisible}) async {
+    try {
+      QuerySnapshot _snapshot =
+          await _postService.fetchPosts(lastVisible: lastVisible);
+
+     return _mapSnapshotToPosts(querySnapshot: _snapshot);
     } catch (e) {
       throw (e);
     }

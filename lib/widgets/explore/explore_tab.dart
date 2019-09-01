@@ -3,6 +3,7 @@ import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ExploreTab extends StatefulWidget {
   final ScrollController scrollController;
@@ -15,17 +16,41 @@ class ExploreTab extends StatefulWidget {
 
 class _ExploreTabState extends State<ExploreTab> {
   CategoryBloc _categoryBloc;
+
+  // final _scrollController = ScrollController();
+  final _scrollThreshold = 200.0;
   PostBloc _postBloc;
+
+  ScrollController get _scrollController => widget.scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _postBloc = BlocProvider.of<PostBloc>(context);
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _postBloc = PostProvider.of(context);
+    // _postBloc = PostFormProvider.of(context);
     _categoryBloc = CategoryProvider.of(context);
   }
 
-  ScrollController get _scrollController => widget.scrollController;
+  // @override
+  // void dispose() {
+  //   _scrollController.dispose();
+  //   super.dispose();
+  // }
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= _scrollThreshold) {
+      _postBloc.onFetchPosts();
+    }
+  }
 
   Widget _buildFlexibleSpaceBarTitle() {
     return Align(
@@ -231,29 +256,64 @@ class _ExploreTabState extends State<ExploreTab> {
     );
   }
 
-  Widget _buildPostFeed({@required List<Post> posts}) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate((context, index) {
-        final Post _post = posts[index];
+  // Widget _buildPostFeed({@required List<Post> posts, @required PostState state}) {
+  //   return SliverList(
+  //     delegate: SliverChildBuilderDelegate((context, index) {
+  //       final Post _post = posts[index];
 
-        return PostCardDefault(post: _post);
-      }, childCount: posts.length),
-    );
-  }
+  //       return PostCardDefault(post: _post);
+  //     }, childCount:  state.hasReachedMax
+  //               ? state.posts.length
+  //               : state.posts.length + 1),
+  //   );
+  // }
 
-  Widget _buildSliverDynamicContent(
-      {@required AsyncSnapshot<List<Post>> snapshot}) {
-    if (!snapshot.hasData) {
+  // Widget _buildSliverDynamicContent(
+  //     {@required AsyncSnapshot<List<Post>> snapshot}) {
+  //   if (!snapshot.hasData) {
+  //     return _buildLoadingIndicator();
+  //   } else {
+  //     final List<Post> _posts = snapshot.data;
+
+  //     if (_posts.isEmpty) {
+  //       return _buildNoPosts();
+  //     }
+
+  //     return _buildPostFeed(posts: _posts);
+  //   }
+  // }
+  Widget _buildSliverDynamicContent({@required PostState state}) {
+    if (state is PostUninitialized) {
       return _buildLoadingIndicator();
-    } else {
-      final List<Post> _posts = snapshot.data;
+    }
+    if (state is PostError) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Text('failed to fetch posts'),
+        ),
+      );
+    }
 
-      if (_posts.isEmpty) {
+    if (state is PostLoaded) {
+      if (state.posts.isEmpty) {
         return _buildNoPosts();
       }
 
-      return _buildPostFeed(posts: _posts);
+      final List<Post> _posts = state.posts;
+
+      return SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return index >= state.posts.length
+              ? BottomLoader()
+              : PostCardDefault(post: _posts[index]);
+        },
+            childCount: state.hasReachedMax
+                ? state.posts.length
+                : state.posts.length + 1),
+      );
     }
+
+    return SliverToBoxAdapter(child: Container());
   }
 
   @override
@@ -262,23 +322,20 @@ class _ExploreTabState extends State<ExploreTab> {
     // final double _contentMaxWidth =
     //     _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .90;
 
-    // final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
-    return StreamBuilder<List<Post>>(
-        stream: _postBloc.posts,
-        builder: (context, snapshot) {
-          return CustomScrollView(
-            controller: _scrollController,
-            physics: BouncingScrollPhysics(),
-            slivers: <Widget>[
-              _buildSliverAppBar(),
-              _buildCategories(),
-              SliverToBoxAdapter(child: _buildSectionLabel(label: 'Post Feed')),
-              _buildSliverDynamicContent(snapshot: snapshot),
-              SliverToBoxAdapter(
-                child: SizedBox(height: 100.0),
-              ),
-            ],
-          );
-        });
+    return BlocBuilder<PostBloc, PostState>(builder: (context, state) {
+      return CustomScrollView(
+        controller: _scrollController,
+        physics: BouncingScrollPhysics(),
+        slivers: <Widget>[
+          _buildSliverAppBar(),
+          _buildCategories(),
+          SliverToBoxAdapter(child: _buildSectionLabel(label: 'Post Feed')),
+          _buildSliverDynamicContent(state: state),
+          SliverToBoxAdapter(
+            child: SizedBox(height: 100.0),
+          ),
+        ],
+      );
+    });
   }
 }
