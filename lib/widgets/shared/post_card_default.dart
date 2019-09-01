@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -323,6 +324,34 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   //       });
   // }
 
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
+
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
+  void _toggleBookmarkStatus({@required AsyncSnapshot<bool> snapshot}) async {
+    ReturnType _response = !snapshot.data
+        ? await _bookmarkBloc.addToBookmarks(post: _post)
+        : await _bookmarkBloc.removeFromBookmarks(post: _post);
+
+    if (_response.returnType) {
+      final _icon = Icon(Icons.info_outline, color: Colors.amber);
+      _showSnackbar(
+          icon: _icon, title: 'Success', message: _response.messagTag);
+    } else {
+      final _icon = Icon(Icons.error_outline, color: Colors.amber);
+      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+    }
+  }
+
   Widget _buildPostListTile() {
     return ListTile(
         title: Text('${_post.title}',
@@ -338,11 +367,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
                   InkWell(
                     onTap: () {
                       print(snapshot.data);
-                      if (!snapshot.data) {
-                        _bookmarkBloc.addToBookmarks(post: _post);
-                      } else {
-                        _bookmarkBloc.removeFromBookmarks(post: _post);
-                      }
+                      _toggleBookmarkStatus(snapshot: snapshot);
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(2.0),

@@ -38,11 +38,12 @@ class _ExploreTabState extends State<ExploreTab> {
     _categoryBloc = CategoryProvider.of(context);
   }
 
-  // @override
-  // void dispose() {
-  //   _scrollController.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    // _scrollController.dispose();
+    _scrollController.removeListener(_onScroll);
+    super.dispose();
+  }
 
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
