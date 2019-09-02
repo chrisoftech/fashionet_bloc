@@ -67,11 +67,11 @@ class BookmarkedTab extends StatelessWidget {
 
                     return Column(
                       children: <Widget>[
-                        index == 0 ? SizedBox(height: 20.0) : Container(),
+                        index == 0 ? SizedBox(height: 10.0) : Container(),
                         PostCardSmall(post: _post),
-                        index == 9
+                        index == _posts.length - 1
                             ? SizedBox(height: 130.0)
-                            : SizedBox(height: 20.0),
+                            : SizedBox(height: 10.0),
                       ],
                     );
                   },

@@ -115,7 +115,8 @@ class _LibraryTabState extends State<LibraryTab>
   Widget _buildSliverAppBar() {
     return SliverAppBar(
       pinned: true,
-      expandedHeight: 220.0,
+      // expandedHeight: 220.0,
+      expandedHeight: 100.0,
       backgroundColor: Colors.white,
       flexibleSpace: _buildFlexibleSpaceBar(),
       actions: <Widget>[
