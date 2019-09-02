@@ -23,8 +23,11 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   bool _isBookmarked = false;
 
   BookmarkBloc _bookmarkBloc;
+  FollowingBloc _followingBloc;
   PostItemBloc _postItemBloc;
-  StreamSubscription _subscription;
+
+  StreamSubscription _bookmarkSubscription;
+  StreamSubscription _followingSubscription;
 
   int _currentPostImageIndex = 0;
 
@@ -53,14 +56,19 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
   void _initBloc() {
     _bookmarkBloc = BookmarkProvider.of(context);
+    _followingBloc = FollowingProvider.of(context);
     _postItemBloc = PostItemBloc(post: _post);
 
-    _subscription =
+    _bookmarkSubscription =
         _bookmarkBloc.bookmarkedPosts.listen(_postItemBloc.bookmarkedPosts);
+
+    _followingSubscription = _followingBloc.followingProfiles
+        .listen(_postItemBloc.followingProfiles);
   }
 
   void _disposeBloc() {
-    _subscription?.cancel();
+    _followingSubscription?.cancel();
+    _bookmarkSubscription?.cancel();
     _postItemBloc?.dispose();
   }
 
@@ -199,50 +207,85 @@ class _PostCardDefaultState extends State<PostCardDefault> {
     );
   }
 
-  Widget _buildFollowTrailingButton() {
-    final double _containerHeight = _isFollowing ? 40.0 : 30.0;
-    final double _containerWidth = _isFollowing ? 40.0 : 100.0;
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
 
-    return InkWell(
-      onTap: () {},
-      splashColor: Colors.black38,
-      borderRadius: BorderRadius.circular(15.0),
-      child: AnimatedContainer(
-        height: _containerHeight,
-        width: _containerWidth,
-        duration: Duration(milliseconds: 100),
-        padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
-        decoration: BoxDecoration(
-          color: Colors.black12,
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Flexible(
-              flex: 2,
-              child: Text(
-                'FOLLOW',
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w900),
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
+  void _toggleFollowingStatus({@required AsyncSnapshot<bool> snapshot}) async {
+    ReturnType _response = !snapshot.data
+        ? await _followingBloc.addToFollowing(profile: _post.profile)
+        : await _followingBloc.removeFromFollowing(profile: _post.profile);
+
+    if (_response.returnType) {
+      final _icon = Icon(Icons.info_outline, color: Colors.amber);
+      _showSnackbar(
+          icon: _icon, title: 'Success', message: _response.messagTag);
+    } else {
+      final _icon = Icon(Icons.error_outline, color: Colors.amber);
+      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+    }
+  }
+
+  Widget _buildFollowTrailingButton() {
+    return StreamBuilder<bool>(
+        initialData: false,
+        stream: _postItemBloc.isFollowing,
+        builder: (context, snapshot) {
+          final double _containerHeight = snapshot.data ? 40.0 : 30.0;
+          final double _containerWidth = snapshot.data ? 40.0 : 100.0;
+
+          return InkWell(
+            onTap: () => _toggleFollowingStatus(snapshot: snapshot),
+            splashColor: Colors.black38,
+            borderRadius: BorderRadius.circular(15.0),
+            child: AnimatedContainer(
+              height: _containerHeight,
+              width: _containerWidth,
+              duration: Duration(milliseconds: 100),
+              padding: EdgeInsets.symmetric(vertical: 3.0, horizontal: 10.0),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  !snapshot.data
+                      ? Flexible(
+                          flex: 2,
+                          child: Text(
+                            'FOLLOW',
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w900),
+                          ),
+                        )
+                      : Container(),
+                  !snapshot.data ? SizedBox(width: 5.0) : Container(),
+                  Flexible(
+                    child: Center(
+                      child: Icon(
+                        !snapshot.data ? Icons.favorite_border : Icons.favorite,
+                        size: 20.0,
+                        color: Colors.red,
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
-            SizedBox(width: 5.0),
-            Flexible(
-              child: Center(
-                child: Icon(
-                  Icons.favorite_border,
-                  size: 20.0,
-                  color: Colors.red,
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget _buildUserListTile() {
@@ -323,19 +366,6 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   //         );
   //       });
   // }
-
-  void _showSnackbar(
-      {@required Icon icon, @required String title, @required String message}) {
-    if (!mounted) return;
-
-    Flushbar(
-      icon: icon,
-      title: title,
-      message: message,
-      flushbarStyle: FlushbarStyle.FLOATING,
-      duration: Duration(seconds: 3),
-    )..show(context);
-  }
 
   void _toggleBookmarkStatus({@required AsyncSnapshot<bool> snapshot}) async {
     ReturnType _response = !snapshot.data

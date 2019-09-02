@@ -48,7 +48,7 @@ class BookmarkBloc {
           messagTag: '${post.title} has been saved in bookmarks');
     } catch (e) {
       // reverse changes if error occurs
-      _bookmarkedPosts.remove(post);
+      _bookmarkedPosts.removeWhere((Post _post) => _post.postId == post.postId);
       _postActionOnBookmarks();
 
       return ReturnType(

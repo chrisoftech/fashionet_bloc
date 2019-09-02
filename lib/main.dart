@@ -21,7 +21,9 @@ void main() {
     AuthProvider(
       child: ProfileProvider(
         child: PostFormProvider(
-            child: BookmarkProvider(child: CategoryProvider(child: MyApp()))),
+            child: FollowingProvider(
+                child:
+                    BookmarkProvider(child: CategoryProvider(child: MyApp())))),
       ),
     ),
   );
