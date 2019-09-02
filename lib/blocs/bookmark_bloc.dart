@@ -48,7 +48,7 @@ class BookmarkBloc {
           messagTag: '${post.title} has been saved in bookmarks');
     } catch (e) {
       // reverse changes if error occurs
-      _bookmarkedPosts.add(post);
+      _bookmarkedPosts.remove(post);
       _postActionOnBookmarks();
 
       return ReturnType(
@@ -59,7 +59,7 @@ class BookmarkBloc {
 
   Future<ReturnType> removeFromBookmarks({@required Post post}) async {
     try {
-      _bookmarkedPosts.remove(post);
+      _bookmarkedPosts.removeWhere((Post _post) => _post.postId == post.postId);
       _postActionOnBookmarks();
 
       await _bookmarkRepository.removeFromBookmarks(postId: post.postId);
