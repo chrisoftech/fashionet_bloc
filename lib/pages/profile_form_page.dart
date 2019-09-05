@@ -4,6 +4,7 @@ import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:libphonenumber/libphonenumber.dart';
 
 import 'package:multi_image_picker/multi_image_picker.dart';
@@ -389,6 +390,9 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
 
     if (!_isCreated.returnType) {
       _showSnackbar(message: _isCreated.messagTag);
+    } else {
+      BlocProvider.of<ProfileVerificationBloc>(context)
+        ..dispatch(VerifyProfile());
     }
   }
 

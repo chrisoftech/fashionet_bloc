@@ -1,14 +1,14 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:keyboard_avoider/keyboard_avoider.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 
 class PostForm extends StatefulWidget {
+ 
   @override
   _PostFormState createState() => _PostFormState();
 }
@@ -649,6 +649,8 @@ class _PostFormState extends State<PostForm> {
       _showSnackbar(
           icon: _icon, title: 'Success', message: _isCreated.messagTag);
       _resetForm();
+
+      // BlocProvider.of<PostBloc>(context)..dispatch(FetchPosts());
     } else {
       final _icon = Icon(Icons.error_outline, color: Colors.red);
       _showSnackbar(icon: _icon, title: 'Error', message: _isCreated.messagTag);

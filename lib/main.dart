@@ -96,8 +96,8 @@ class _MyAppState extends State<MyApp> {
 class AuthDecisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-      PopupMenu.context = context;
-      
+    PopupMenu.context = context;
+
     return BlocBuilder<AuthVerificationBloc, AuthVerificationState>(
       builder: (context, state) {
         if (state is Uninitialized) {
@@ -113,7 +113,7 @@ class AuthDecisionPage extends StatelessWidget {
               child: ProfileDecisionPage());
         }
 
-         return SplashPage();
+        return SplashPage();
       },
     );
   }
@@ -124,8 +124,6 @@ class ProfileDecisionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProfileVerificationBloc, ProfileVerificationState>(
       builder: (context, state) {
-      
-
         if (state is UninitializedProfile) {
           return SplashPage();
         }

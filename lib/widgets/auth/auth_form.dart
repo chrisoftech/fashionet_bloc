@@ -203,16 +203,14 @@ class _AuthFormState extends State<AuthForm> {
                       fontSize: 20.0,
                       fontWeight: FontWeight.bold)),
               SizedBox(width: 20.0),
-              // snapshot.data == LoginState.Loading
-              //     ? SizedBox(
-              //         height: 20.0,
-              //         width: 20.0,
-              //         child: CircularProgressIndicator(
-              //             strokeWidth: 2.0),
-              //       )
-              //     :
-              Icon(Icons.arrow_forward_ios,
-                  size: 18.0, color: Theme.of(context).primaryColor)
+              state.isSubmitting
+                  ? SizedBox(
+                      height: 20.0,
+                      width: 20.0,
+                      child: CircularProgressIndicator(strokeWidth: 2.0),
+                    )
+                  : Icon(Icons.arrow_forward_ios,
+                      size: 18.0, color: Theme.of(context).primaryColor)
             ],
           ),
         ),
@@ -273,26 +271,11 @@ class _AuthFormState extends State<AuthForm> {
           _showSnackbar(icon: _icon, title: 'Error', message: 'Login failure');
         }
         if (state.isSubmitting) {
-          final _icon = Icon(Icons.work, color: Colors.red);
-
-          if (!mounted) return;
-
-          Flushbar(
-            icon: _icon,
-            title: 'Authenticating',
-            messageText: Row(
-              children: <Widget>[
-                Text('Verifying authentication credentials'),
-                SizedBox(width: 20.0),
-                SizedBox(
-                    height: 30.0,
-                    width: 30.0,
-                    child: CircularProgressIndicator(strokeWidth: 2.0)),
-              ],
-            ),
-            flushbarStyle: FlushbarStyle.FLOATING,
-            duration: Duration(seconds: 3),
-          )..show(context);
+          final _icon = Icon(Icons.info_outline, color: Colors.green);
+          _showSnackbar(
+              icon: _icon,
+              title: 'Authenticating',
+              message: 'Verifying authentication credentials');
         }
         if (state.isSuccess) {
           BlocProvider.of<AuthVerificationBloc>(context)..dispatch(LoggedIn());

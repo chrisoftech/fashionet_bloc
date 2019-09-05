@@ -29,14 +29,18 @@ class ProfileRepository {
     );
   }
 
-  Future<Profile> hasProfile() async {
+  Future<bool> hasProfile() async {
     try {
       final String _currentUserId =
           (await _authRepository.authenticated())?.uid;
 
       final DocumentSnapshot _document =
           await _profileService.hasProfile(userId: _currentUserId);
-      return _mapSnapshotToProfile(document: _document);
+
+      final bool _hasProfile = _document.exists;
+          // _mapSnapshotToProfile(document: _document) != null;
+
+      return _hasProfile;
     } catch (e) {
       throw (e);
     }

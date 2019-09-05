@@ -462,7 +462,8 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
             Icon(Icons.phone_android, size: 15.0),
             SizedBox(width: 5.0),
             Text('${_post.profile.phoneNumber}'),
-            _post.profile.otherPhoneNumber.isEmpty
+            _post.profile.otherPhoneNumber == null ||
+                    _post.profile.otherPhoneNumber.isEmpty
                 ? Container()
                 : Text(' ,${_post.profile.otherPhoneNumber}'),
           ],

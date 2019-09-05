@@ -14,12 +14,11 @@ class UninitializedProfile extends ProfileVerificationState {
 }
 
 class HasProfile extends ProfileVerificationState {
-  final Profile profile;
+  // final Profile profile;
 
-  HasProfile({@required this.profile}) : super([profile]);
-
+  // HasProfile({@required this.profile}) : super([profile]);
   @override
-  String toString() => 'HasProfile { profileId: ${profile.userId} }';
+  String toString() => 'HasProfile';
 }
 
 class NoProfile extends ProfileVerificationState {
@@ -62,11 +61,11 @@ class ProfileVerificationBloc
 
   Stream<ProfileVerificationState> _mapVerifyProfileToState() async* {
     try {
-      final bool _hasProfile = await _profileRepository.hasProfile() != null;
+      final bool _hasProfile = await _profileRepository.hasProfile();
       if (_hasProfile) {
-        final Profile _profile = await _profileRepository.hasProfile();
+        // final Profile _profile = await _profileRepository.hasProfile();
 
-        yield HasProfile(profile: _profile);
+        yield HasProfile();
       } else {
         yield NoProfile();
       }

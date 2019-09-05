@@ -20,7 +20,6 @@ class PostCardDefault extends StatefulWidget {
 }
 
 class _PostCardDefaultState extends State<PostCardDefault> {
-
   BookmarkBloc _bookmarkBloc;
   FollowingBloc _followingBloc;
   PostItemBloc _postItemBloc;
@@ -69,6 +68,11 @@ class _PostCardDefaultState extends State<PostCardDefault> {
     _followingSubscription?.cancel();
     _bookmarkSubscription?.cancel();
     _postItemBloc?.dispose();
+  }
+
+  void _navigateToPostUserProfile() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ProfilePage(profile: _post.profile)));
   }
 
   Widget _buildActivePostImage() {
@@ -289,7 +293,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
   Widget _buildUserListTile() {
     return ListTile(
-      onTap: () {},
+      onTap: () => _navigateToPostUserProfile(),
       leading: Container(
         height: 50.0,
         width: 50.0,
