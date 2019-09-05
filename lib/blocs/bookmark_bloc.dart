@@ -38,7 +38,11 @@ class BookmarkBloc {
 
   Future<ReturnType> addToBookmarks({@required Post post}) async {
     try {
-      _bookmarkedPosts.add(post);
+      // _bookmarkedPosts.add(post);
+      final List<Post> _bookmarkedPostsList = _bookmarkedPosts.toList();
+      _bookmarkedPostsList.insert(0, post);
+
+      _bookmarkedPosts = _bookmarkedPostsList.toSet();
       _postActionOnBookmarks();
 
       await _bookmarkRepository.addToBookmarks(postId: post.postId);

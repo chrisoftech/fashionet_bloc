@@ -15,10 +15,16 @@ class BottomTab extends StatefulWidget {
 }
 
 class _BottomTabState extends State<BottomTab> {
-  int _activeIndex = 0;
+  int _activeIndex;
 
   int get _activeTabIndex => widget.activeTabIndex;
   Function(int) get _onActiveTabChanged => widget.onActiveTabChanged;
+
+  @override
+  void initState() {
+    _activeIndex = widget.activeTabIndex;
+    super.initState();
+  }
 
   void didUpdateWidget(Widget oldWidget) {
     super.didUpdateWidget(oldWidget);

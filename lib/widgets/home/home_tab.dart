@@ -1,7 +1,9 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/transitions/transitions.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popup_menu/popup_menu.dart';
 
 class HomeTab extends StatefulWidget {
@@ -22,6 +24,7 @@ class _HomeTabState extends State<HomeTab> {
       Navigator.of(context).push(SlideLeftRoute(page: CategoriesPage()));
     } else if (item.menuTitle == 'Signout') {
       print('App signout');
+      BlocProvider.of<AuthVerificationBloc>(context)..dispatch(LoggedOut());
     }
   }
 

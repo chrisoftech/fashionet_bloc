@@ -6,8 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
-enum AuthState { AppStarted, Authenticated, Unauthenticated }
-enum LoginState { Default, Loading, Success, Failure }
+// enum AuthState { AppStarted, Authenticated, Unauthenticated }
+// enum LoginState { Default, Loading, Success, Failure }
 
 class AuthBloc {
   final AuthRepository _authRepository;
@@ -19,13 +19,13 @@ class AuthBloc {
   final _confirmPasswordController = BehaviorSubject<String>();
 
   // authentication states controllers
-  final _authStateController = BehaviorSubject<AuthState>();
-  final _loginStateController = BehaviorSubject<LoginState>();
+  // final _authStateController = BehaviorSubject<AuthState>();
+  // final _loginStateController = BehaviorSubject<LoginState>();
 
   AuthBloc()
       : _authRepository = AuthRepository(),
         _firebaseAuth = FirebaseAuth.instance {
-    _authStateController.sink.add(AuthState.AppStarted);
+    // _authStateController.sink.add(AuthState.AppStarted);
     _firebaseAuth.onAuthStateChanged.listen(_onAuthStateChanged);
   }
 
@@ -52,10 +52,10 @@ class AuthBloc {
       email, password, confirmPassword, (e, p, c) => true);
 
   // authentication state streams
-  Observable<AuthState> get authState =>
-      _authStateController.stream.defaultIfEmpty(AuthState.AppStarted);
-  Observable<LoginState> get loginState =>
-      _loginStateController.stream.defaultIfEmpty(LoginState.Default);
+  // Observable<AuthState> get authState =>
+  //     _authStateController.stream.defaultIfEmpty(AuthState.AppStarted);
+  // Observable<LoginState> get loginState =>
+  //     _loginStateController.stream.defaultIfEmpty(LoginState.Default);
 
   // form inputs
   Function(String) get onEmailChanged => _emailController.sink.add;
@@ -83,9 +83,9 @@ class AuthBloc {
 
   Future<void> _onAuthStateChanged(FirebaseUser firebaseUser) async {
     if (firebaseUser == null) {
-      _authStateController.sink.add(AuthState.Unauthenticated);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
     } else {
-      _authStateController.sink.add(AuthState.Authenticated);
+      // _authStateController.sink.add(AuthState.Authenticated);
     }
   }
 
@@ -97,20 +97,20 @@ class AuthBloc {
 
   Future<ReturnType> authenticated() async {
     try {
-      _authStateController.sink.add(AuthState.AppStarted);
-      _loginStateController.sink.add(LoginState.Loading);
+      // _authStateController.sink.add(AuthState.AppStarted);
+      // _loginStateController.sink.add(LoginState.Loading);
 
       final FirebaseUser _user = await _authRepository.authenticated();
 
       if (_user != null) {
-        _authStateController.sink.add(AuthState.Authenticated);
-        _loginStateController.sink.add(LoginState.Success);
+        // _authStateController.sink.add(AuthState.Authenticated);
+        // _loginStateController.sink.add(LoginState.Success);
 
         return ReturnType(returnType: true, messagTag: 'Authenticated');
       }
 
-      _authStateController.sink.add(AuthState.Unauthenticated);
-      _loginStateController.sink.add(LoginState.Failure);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
+      // _loginStateController.sink.add(LoginState.Failure);
 
       return ReturnType(returnType: false, messagTag: 'Unauthenticated');
     } catch (e) {
@@ -124,21 +124,21 @@ class AuthBloc {
 
   Future<ReturnType> signInUser() async {
     try {
-      _loginStateController.sink.add(LoginState.Loading);
+      // _loginStateController.sink.add(LoginState.Loading);
 
       await _authRepository.signInWithEmailAndPassword(
           email: _emailController.value, password: _passwordController.value);
 
       // await Future.delayed(Duration(seconds: 5));
 
-      _authStateController.sink.add(AuthState.Authenticated);
-      _loginStateController.sink.add(LoginState.Success);
+      // _authStateController.sink.add(AuthState.Authenticated);
+      // _loginStateController.sink.add(LoginState.Success);
 
       // _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
-      _authStateController.sink.add(AuthState.Unauthenticated);
-      _loginStateController.sink.add(LoginState.Failure);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
+      // _loginStateController.sink.add(LoginState.Failure);
 
       return ReturnType(returnType: false, messagTag: e.message);
       // return ReturnType(
@@ -148,19 +148,19 @@ class AuthBloc {
 
   Future<ReturnType> signUpUser() async {
     try {
-      _loginStateController.sink.add(LoginState.Loading);
+      // _loginStateController.sink.add(LoginState.Loading);
 
       await _authRepository.createUserWithEmailAndPassword(
           email: _emailController.value, password: _passwordController.value);
 
-      _authStateController.sink.add(AuthState.Authenticated);
-      _loginStateController.sink.add(LoginState.Success);
+      // _authStateController.sink.add(AuthState.Authenticated);
+      // _loginStateController.sink.add(LoginState.Success);
 
       // _resetControllers();
       return ReturnType(returnType: true, messagTag: 'User Authenticated');
     } catch (e) {
-      _authStateController.sink.add(AuthState.Unauthenticated);
-      _loginStateController.sink.add(LoginState.Failure);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
+      // _loginStateController.sink.add(LoginState.Failure);
 
       return ReturnType(returnType: false, messagTag: e.message);
       // return ReturnType(
@@ -170,17 +170,17 @@ class AuthBloc {
 
   Future<ReturnType> signOutUser() async {
     try {
-      _loginStateController.sink.add(LoginState.Loading);
+      // _loginStateController.sink.add(LoginState.Loading);
 
       await _authRepository.signOut();
 
-      _authStateController.sink.add(AuthState.Authenticated);
-      _loginStateController.sink.add(LoginState.Success);
+      // _authStateController.sink.add(AuthState.Authenticated);
+      // _loginStateController.sink.add(LoginState.Success);
 
       return ReturnType(returnType: true, messagTag: 'User Signed-Out');
     } catch (e) {
-      _authStateController.sink.add(AuthState.Unauthenticated);
-      _loginStateController.sink.add(LoginState.Failure);
+      // _authStateController.sink.add(AuthState.Unauthenticated);
+      // _loginStateController.sink.add(LoginState.Failure);
 
       return ReturnType(returnType: false, messagTag: e.message);
       // returnType: false, messagTag: (e as PlatformException).message);
@@ -192,7 +192,7 @@ class AuthBloc {
     _passwordController.close();
     _confirmPasswordController.close();
 
-    _authStateController.close();
-    _loginStateController.close();
+    // _authStateController.close();
+    // _loginStateController.close();
   }
 }

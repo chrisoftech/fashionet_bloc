@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/repositories/repositories.dart';
@@ -9,14 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:rxdart/rxdart.dart';
 
-enum ProfileStatus { Default, HasProfile, NoProfile }
 enum ProfileState { Default, Loading, Success, Failure }
 
 class ProfileBloc with ProfileValidators {
   final ProfileRepository _profileRepository;
   final ImageRepository _imageRepository;
 
-  final _profileStatusController = BehaviorSubject<ProfileStatus>();
   final _profileStateController = BehaviorSubject<ProfileState>();
 
   final _currentUserProfileController = BehaviorSubject<Profile>();
@@ -36,8 +33,6 @@ class ProfileBloc with ProfileValidators {
       : _profileRepository = ProfileRepository(),
         _imageRepository = ImageRepository();
 
-  Observable<ProfileStatus> get profileStatus =>
-      _profileStatusController.stream.defaultIfEmpty(ProfileStatus.Default);
   Observable<ProfileState> get profileState =>
       _profileStateController.stream.defaultIfEmpty(ProfileState.Default);
 
@@ -95,53 +90,6 @@ class ProfileBloc with ProfileValidators {
     }
   }
 
-  void _mapStreamToProfile({@required Stream<DocumentSnapshot> document}) {
-    document.listen(
-      (snapshot) {
-        if (snapshot.exists) {
-          final Profile _profile = Profile(
-            userId: snapshot.documentID,
-            firstName: snapshot.data['firstName'],
-            lastName: snapshot.data['lastName'],
-            businessName: snapshot.data['businessName'],
-            businessDescription: snapshot.data['businessDescription'],
-            dialCode: snapshot.data['dialCode'],
-            phoneNumber: snapshot.data['phoneNumber'],
-            otherPhoneNumber: snapshot.data['otherPhoneNumber'],
-            businessLocation: snapshot.data['businessLocation'],
-            imageUrl: snapshot.data['imageUrl'],
-            created: snapshot.data['created'],
-            lastUpdate: snapshot.data['lastUpdate'],
-          );
-
-          _currentUserProfileController.sink.add(_profile);
-          _profileStatusController.sink.add(ProfileStatus.HasProfile);
-          return;
-        }
-
-        _currentUserProfileController.sink.add(null);
-        _profileStatusController.sink.add(ProfileStatus.NoProfile);
-        return;
-      },
-    );
-  }
-
-  void hasProfile() {
-    try {
-      _profileStatusController.sink.add(ProfileStatus.Default);
-
-      _profileRepository.hasProfile().then((Stream<DocumentSnapshot> document) {
-        return _mapStreamToProfile(document: document);
-      });
-    } catch (e) {
-      print(e.toString());
-
-      _currentUserProfileController.sink.add(null);
-      _profileStatusController.sink.add(ProfileStatus.NoProfile);
-      return;
-    }
-  }
-
   Future<ReturnType> createProfile() async {
     try {
       _profileStateController.add(ProfileState.Loading);
@@ -176,7 +124,6 @@ class ProfileBloc with ProfileValidators {
   }
 
   void dispose() {
-    _profileStatusController?.close();
     _currentUserProfileController?.close();
 
     _firstNameController?.close();

@@ -12,12 +12,31 @@ class ProfileRepository {
       : _authRepository = AuthRepository(),
         _profileService = ProfileService();
 
-  Future<Stream<DocumentSnapshot>> hasProfile() async {
+  Profile _mapSnapshotToProfile({@required DocumentSnapshot document}) {
+    return Profile(
+      userId: document.documentID,
+      firstName: document.data['firstname'],
+      lastName: document.data['lastname'],
+      businessName: document.data['businessName'],
+      businessDescription: document.data['businessDescription'],
+      dialCode: document.data['dialCode'],
+      phoneNumber: document.data['phoneNumber'],
+      otherPhoneNumber: document.data['otherPhoneNumber'],
+      businessLocation: document.data['location'],
+      imageUrl: document.data['imageUrl'],
+      created: document.data['created'],
+      lastUpdate: document.data['lastUpdate'],
+    );
+  }
+
+  Future<Profile> hasProfile() async {
     try {
       final String _currentUserId =
           (await _authRepository.authenticated())?.uid;
 
-      return _profileService.hasProfile(userId: _currentUserId);
+      final DocumentSnapshot _document =
+          await _profileService.hasProfile(userId: _currentUserId);
+      return _mapSnapshotToProfile(document: _document);
     } catch (e) {
       throw (e);
     }
@@ -28,20 +47,7 @@ class ProfileRepository {
       DocumentSnapshot _document =
           await _profileService.fetchProfile(userId: userId);
 
-      return Profile(
-        userId: _document.documentID,
-        firstName: _document.data['firstname'],
-        lastName: _document.data['lastname'],
-        businessName: _document.data['businessName'],
-        businessDescription: _document.data['businessDescription'],
-        dialCode: _document.data['dialCode'],
-        phoneNumber: _document.data['phoneNumber'],
-        otherPhoneNumber: _document.data['otherPhoneNumber'],
-        businessLocation: _document.data['location'],
-        imageUrl: _document.data['imageUrl'],
-        created: _document.data['created'],
-        lastUpdate: _document.data['lastUpdate'],
-      );
+      return _mapSnapshotToProfile(document: _document);
     } catch (e) {
       throw (e);
     }

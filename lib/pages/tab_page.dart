@@ -22,12 +22,15 @@ class _TabPageState extends State<TabPage> {
   ScrollController _libraryTabScrollController;
   // final _scrollThreshold = 5000.0;
 
+  final PageController _pageController = PageController();
+  PageView _pageView;
+
   @override
   void initState() {
     super.initState();
 
     _scrollController = ScrollController();
-    _libraryTabScrollController = ScrollController();    
+    _libraryTabScrollController = ScrollController();
   }
 
   @override
@@ -60,7 +63,6 @@ class _TabPageState extends State<TabPage> {
   //   return _scrollController.position.pixels >= _scrollThreshold ? true : false;
   // }
 
-  
   // void _showSnackbar(
   //     {@required Icon icon, @required String title, @required String message}) {
   //   if (!mounted) return;
@@ -156,6 +158,23 @@ class _TabPageState extends State<TabPage> {
 
   @override
   Widget build(BuildContext context) {
+    _pageView = PageView(
+      onPageChanged: (int index) {
+        setState(() {
+          _activeTabIndex = index;
+        });
+      },
+      controller: _pageController,
+      children: <Widget>[
+        ExploreTab(scrollController: _scrollController),
+        LibraryTab(
+          scrollController: _scrollController,
+          tabScrollController: _libraryTabScrollController,
+        ),
+        HomeTab(scrollController: _scrollController)
+      ],
+    );
+
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
@@ -163,6 +182,8 @@ class _TabPageState extends State<TabPage> {
         onActiveTabChanged: (int index) {
           setState(() {
             _activeTabIndex = index;
+            // _pageController.animateToPage(index,
+            //     duration: Duration(milliseconds: 500), curve: Curves.ease);
           });
         },
         activeTabIndex: _activeTabIndex,

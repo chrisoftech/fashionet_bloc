@@ -9,6 +9,18 @@ import 'providers/providers.dart';
 
 class SimpleBlocDelegate extends BlocDelegate {
   @override
+  void onEvent(Bloc bloc, Object event) {
+    super.onEvent(bloc, event);
+    print(event);
+  }
+
+  @override
+  void onError(Bloc bloc, Object error, StackTrace stacktrace) {
+    super.onError(bloc, error, stacktrace);
+    print(error);
+  }
+
+  @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
     print(transition);
@@ -18,12 +30,15 @@ class SimpleBlocDelegate extends BlocDelegate {
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
   runApp(
-    AuthProvider(
-      child: ProfileProvider(
-        child: PostFormProvider(
-            child: FollowingProvider(
-                child:
-                    BookmarkProvider(child: CategoryProvider(child: MyApp())))),
+    BlocProvider(
+      builder: (context) => AuthVerificationBloc()..dispatch(AppStarted()),
+      child: AuthProvider(
+        child: ProfileProvider(
+          child: PostFormProvider(
+              child: FollowingProvider(
+                  child: BookmarkProvider(
+                      child: CategoryProvider(child: MyApp())))),
+        ),
       ),
     ),
   );
@@ -81,52 +96,51 @@ class _MyAppState extends State<MyApp> {
 class AuthDecisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    PopupMenu.context = context;
-
-    AuthBloc _authBloc = AuthProvider.of(context);
-    ProfileBloc _profileBloc = ProfileProvider.of(context);
-
-    return StreamBuilder(
-        stream: _authBloc.authState,
-        builder: (context, AsyncSnapshot<AuthState> snapshot) {
-          print('Auth Descision Page ${snapshot.data.toString()}');
-          if (snapshot.hasData) {
-            if (snapshot.data == AuthState.AppStarted) {
-              return SplashPage();
-            } else if (snapshot.data == AuthState.Authenticated) {
-              _profileBloc.hasProfile();
-              return ProfileDecisionPage();
-            } else {
-              return AuthPage();
-            }
-          }
+      PopupMenu.context = context;
+      
+    return BlocBuilder<AuthVerificationBloc, AuthVerificationState>(
+      builder: (context, state) {
+        if (state is Uninitialized) {
           return SplashPage();
-        });
+        }
+        if (state is Unauthenticated) {
+          return AuthPage();
+        }
+        if (state is Authenticated) {
+          return BlocProvider(
+              builder: (context) =>
+                  ProfileVerificationBloc()..dispatch(VerifyProfile()),
+              child: ProfileDecisionPage());
+        }
+
+         return SplashPage();
+      },
+    );
   }
 }
 
 class ProfileDecisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ProfileBloc _profileBloc = ProfileProvider.of(context);
+    return BlocBuilder<ProfileVerificationBloc, ProfileVerificationState>(
+      builder: (context, state) {
+      
 
-    return StreamBuilder<ProfileStatus>(
-        stream: _profileBloc.profileStatus,
-        builder: (context, snapshot) {
-          print('Profile Descision Page ${snapshot.data.toString()}');
-          if (snapshot.hasData) {
-            if (snapshot.data == ProfileStatus.Default) {
-              return SplashPage();
-            } else if (snapshot.data == ProfileStatus.HasProfile) {
-              return BlocProvider(
-                builder: (context) => PostBloc()..onFetchPosts(),
-                child: TabPage(),
-              );
-            } else {
-              return ProfileFormPage();
-            }
-          }
+        if (state is UninitializedProfile) {
           return SplashPage();
-        });
+        }
+        if (state is NoProfile) {
+          return ProfileFormPage();
+        }
+        if (state is HasProfile) {
+          return BlocProvider(
+            builder: (context) => PostBloc()..onFetchPosts(),
+            child: TabPage(),
+          );
+        }
+
+        return SplashPage();
+      },
+    );
   }
 }

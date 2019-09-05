@@ -9,8 +9,8 @@ class ProfileService {
       : _serverTimeStamp = FieldValue.serverTimestamp(),
         _profileCollection = Firestore.instance.collection('profile');
 
-  Stream<DocumentSnapshot> hasProfile({@required String userId}) {
-    return _profileCollection.document(userId).snapshots();
+  Future<DocumentSnapshot> hasProfile({@required String userId}) {
+    return _profileCollection.document(userId).get();
   }
 
   Future<DocumentSnapshot> fetchProfile({@required String userId}) {

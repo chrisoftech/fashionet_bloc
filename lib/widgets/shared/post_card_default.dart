@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -19,8 +20,6 @@ class PostCardDefault extends StatefulWidget {
 }
 
 class _PostCardDefaultState extends State<PostCardDefault> {
-  bool _isFollowing = false;
-  bool _isBookmarked = false;
 
   BookmarkBloc _bookmarkBloc;
   FollowingBloc _followingBloc;
@@ -436,7 +435,10 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         Card(
           elevation: 8.0,
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => PostDetailsPage(post: _post)));
+            },
             child: Container(
               width: _contentWidth,
               child: Column(
