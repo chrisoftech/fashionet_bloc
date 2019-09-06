@@ -1,14 +1,22 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class ProfilePage extends StatefulWidget {
   final Profile profile;
+  final bool isCurrentUserProfile;
 
-  const ProfilePage({Key key, this.profile}) : super(key: key);
+  const ProfilePage(
+      {Key key, @required this.profile, @required this.isCurrentUserProfile})
+      : super(key: key);
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -24,50 +32,44 @@ class _ProfilePageState extends State<ProfilePage> {
   int _currentDisplayedPageIndex = 0;
 
   Profile get _profile => widget.profile;
-  bool _isCurrentUserProfile = true;
+  bool get _isCurrentUserProfile => widget.isCurrentUserProfile;
+
+  FollowingBloc _followingBloc;
+  PostProfileBloc _postProfileBloc;
+  StreamSubscription _subscription;
 
   @override
-  void initState() {
-    super.initState();
-    // _scrollController.addListener(_onScroll);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    // _profileBloc = Provider.of<ProfileBloc>(context, listen: false);
-    // _postBloc = Provider.of<PostBloc>(context, listen: false);
-    // _postEditBloc = Provider.of<PostEditBloc>(context, listen: false);
-
-    // if (_profileBloc.userProfile != null) {
-    //   setState(() {
-    //     _profileBloc.userProfile.userId == _profile.userId
-    //         ? _isCurrentUserProfile = true
-    //         : _isCurrentUserProfile = false;
-    //   });
-    // }
-
-    // _onWidgetDidBuild(() {
-    //   _postBloc.fetchProfilePosts(userId: _profile.userId);
-    // });
+    _initBloc();
   }
 
-  // @override
-  // void dispose() {
-  //   _scrollController.removeListener(_onScroll);
-  //   super.dispose();
-  // }
+  @override
+  void didUpdateWidget(ProfilePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-  // void _onScroll() {
-  //   final maxScroll = _scrollController.position.maxScrollExtent;
-  //   final currentScroll = _scrollController.position.pixels;
-  //   if (maxScroll - currentScroll <= _scrollThreshold) {
-  //     print('sroll next');
-  //     _postBloc.fetchMoreProfilePosts(userId: _profile.userId);
-  //   }
-  // }
+    _disposeBloc();
+    _initBloc();
+  }
 
-  // void _onWidgetDidBuild(Function callback) {
-  //   WidgetsBinding.instance.addPostFrameCallback((_) {
-  //     callback();
-  //   });
-  // }
+  @override
+  void dispose() {
+    _disposeBloc();
+    super.dispose();
+  }
+
+  void _initBloc() {
+    _followingBloc = FollowingProvider.of(context);
+    _postProfileBloc = PostProfileBloc(_profile);
+
+    _subscription = _followingBloc.followingProfiles
+        .listen(_postProfileBloc.followingProfiles);
+  }
+
+  void _disposeBloc() {
+    _subscription?.cancel();
+  }
 
   void onClickMenu(MenuItemProvider item) {
     print('Click menu -> ${item.menuTitle}');
@@ -182,80 +184,128 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildProfileFollowButton() {
-    // final double _containerHeight = _profile.isFollowing ? 30.0 : 30.0;
-    // final double _containerWidth =
-    //     _isCurrentUserProfile ? 100.0 : _profile.isFollowing ? 110.0 : 140.0;
-    final bool _isFollowing = false;
-
-    return Material(
-      elevation: 10.0,
-      type: MaterialType.button,
-      color: Theme.of(context).accentColor,
-      borderRadius: BorderRadius.circular(20.0),
-      child: InkWell(
-        splashColor: Colors.black38,
-        borderRadius: BorderRadius.circular(20.0),
-        onTap: _isCurrentUserProfile
-            ? null
-            : () {
-                // postBloc.toggleFollowProfilePageStatus(
-                //     currentPostProfile: _profile);
-              },
-        child: AnimatedContainer(
-          height: 30.0,
-          width: 100.0,
-          // height: _containerHeight,
-          // width: _containerWidth,
-          duration: Duration(milliseconds: 300),
-          padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
-          child: Row(
+  Widget _buildFollowButton({@required AsyncSnapshot<bool> snapshot}) {
+    return _isCurrentUserProfile
+        ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _isCurrentUserProfile
-                  ? Container()
-                  : _isFollowing
-                      ? Flexible(
-                          child: Center(
-                            child: Icon(
-                              Icons.favorite,
-                              size: 20.0,
-                              color: Colors.black38,
-                              // color: Colors.red,
-                            ),
-                          ),
-                        )
-                      : Flexible(
-                          child: Text(
-                            'Follow',
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                // color: Colors.black45,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-              _isCurrentUserProfile ? Container() : SizedBox(width: 5.0),
-              _isCurrentUserProfile
-                  ? Container()
-                  : Container(
-                      height: 15.0,
-                      width: 1.0,
-                      decoration: BoxDecoration(
-                          color: Colors.black38,
-                          borderRadius: BorderRadius.circular(5.0)),
-                    ),
-              _isCurrentUserProfile ? Container() : SizedBox(width: 10.0),
-              // Text(
-              //   '${_profile.followersCount} ${_profile.followersCount > 1 ? 'followers' : 'follower'}',
-              //   style: TextStyle(color: Theme.of(context).primaryColor),
-              // )
+              Text(
+                '50k',
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold),
+              ),
+              SizedBox(width: 5.0),
+              Container(
+                height: 15.0,
+                width: 1.0,
+                decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(5.0)),
+              ),
+              SizedBox(width: 10.0),
+              Text(
+                'Followers',
+                style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 15.0,
+                ),
+              ),
             ],
-          ),
-        ),
-      ),
-    );
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Flexible(
+                child: Text(
+                  snapshot.data ? 'Following' : 'Follow',
+                  style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      // color: Colors.black45,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ),
+              SizedBox(width: 5.0),
+              Container(
+                height: 15.0,
+                width: 1.0,
+                decoration: BoxDecoration(
+                    color: Colors.black38,
+                    borderRadius: BorderRadius.circular(5.0)),
+              ),
+              SizedBox(width: 10.0),
+              Icon(
+                snapshot.data ? Icons.favorite : Icons.favorite_border,
+                color: Colors.red,
+                size: 20.0,
+              ),
+            ],
+          );
+  }
+
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
+
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
+  }
+
+  void _toggleFollowingStatus({@required AsyncSnapshot<bool> snapshot}) async {
+    ReturnType _response = !snapshot.data
+        ? await _followingBloc.addToFollowing(profile: _profile)
+        : await _followingBloc.removeFromFollowing(profile: _profile);
+
+    if (_response.returnType) {
+      final _icon = Icon(Icons.info_outline, color: Colors.amber);
+      _showSnackbar(
+          icon: _icon, title: 'Success', message: _response.messagTag);
+    } else {
+      final _icon = Icon(Icons.error_outline, color: Colors.amber);
+      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+    }
+  }
+
+  Widget _buildProfileFollowButton() {
+   
+    return StreamBuilder<bool>(
+        initialData: false,
+        stream: _postProfileBloc.isFollowing,
+        builder: (context, snapshot) {
+          final double _containerHeight = snapshot.data ? 30.0 : 30.0;
+          final double _containerWidth =
+              _isCurrentUserProfile ? 120.0 : snapshot.data ? 120.0 : 100.0;
+
+          return Material(
+            elevation: 10.0,
+            type: MaterialType.button,
+            color: Theme.of(context).accentColor,
+            borderRadius: BorderRadius.circular(20.0),
+            child: InkWell(
+              splashColor: Colors.black38,
+              borderRadius: BorderRadius.circular(20.0),
+              onTap: _isCurrentUserProfile
+                  ? null
+                  : () => _toggleFollowingStatus(snapshot: snapshot),
+              child: AnimatedContainer(
+                height: _containerHeight,
+                width: _containerWidth,
+                duration: Duration(milliseconds: 200),
+                padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                decoration:
+                    BoxDecoration(borderRadius: BorderRadius.circular(20.0)),
+                child: _buildFollowButton(snapshot: snapshot),
+              ),
+            ),
+          );
+        });
   }
 
   Widget _buildProfileContactButtons() {
@@ -427,11 +477,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return WillPopScope(
       onWillPop: () async {
-        if (_menu != null && _menu.isShow) {
+        if (_isCurrentUserProfile && _menu != null && _menu.isShow) {
           _menu.dismiss();
         }
 
-        if (_panelController.isPanelOpen()) {
+        if (_isCurrentUserProfile && _panelController.isPanelOpen()) {
           _panelController.close();
           return false;
         }

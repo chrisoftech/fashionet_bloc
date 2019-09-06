@@ -32,6 +32,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   int _currentPostImageIndex = 0;
 
   Post get _post => widget.post;
+  bool _isCurrentUserPost;
 
   @override
   void didChangeDependencies() {
@@ -78,8 +79,10 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   }
 
   void _navigateToPostUserProfile() {
+    print('IsCurrentUser $_isCurrentUserPost');
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ProfilePage(profile: _post.profile)));
+        builder: (context) => ProfilePage(
+            profile: _post.profile, isCurrentUserProfile: _isCurrentUserPost)));
   }
 
   Widget _buildActivePostImage() {
@@ -339,6 +342,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
           initialData: false,
           stream: _postItemBloc.isCurrentUser,
           builder: (context, snapshot) {
+            _isCurrentUserPost =
+                snapshot.data; // if this post is by current user
             return snapshot.data
                 ? IconButton(
                     onPressed: () {},

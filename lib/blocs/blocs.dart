@@ -7,5 +7,6 @@ export 'login_bloc.dart';
 export 'post_bloc.dart';
 export 'post_form_bloc.dart';
 export 'post_item_bloc.dart';
+export 'post_profile_bloc.dart';
 export 'profile_bloc.dart';
 export 'profile_verification_bloc.dart';
