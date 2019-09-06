@@ -22,10 +22,12 @@ class PostCardDefault extends StatefulWidget {
 class _PostCardDefaultState extends State<PostCardDefault> {
   BookmarkBloc _bookmarkBloc;
   FollowingBloc _followingBloc;
+  ProfileBloc _profileBloc;
   PostItemBloc _postItemBloc;
 
   StreamSubscription _bookmarkSubscription;
   StreamSubscription _followingSubscription;
+  StreamSubscription _currentUserSubscription;
 
   int _currentPostImageIndex = 0;
 
@@ -55,6 +57,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   void _initBloc() {
     _bookmarkBloc = BookmarkProvider.of(context);
     _followingBloc = FollowingProvider.of(context);
+    _profileBloc = ProfileProvider.of(context);
     _postItemBloc = PostItemBloc(post: _post);
 
     _bookmarkSubscription =
@@ -62,11 +65,15 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
     _followingSubscription = _followingBloc.followingProfiles
         .listen(_postItemBloc.followingProfiles);
+
+    _currentUserSubscription = _profileBloc.currentUserProfile
+        .listen(_postItemBloc.currentUserProfile);
   }
 
   void _disposeBloc() {
     _followingSubscription?.cancel();
     _bookmarkSubscription?.cancel();
+    _currentUserSubscription?.cancel();
     _postItemBloc?.dispose();
   }
 
@@ -328,7 +335,18 @@ class _PostCardDefaultState extends State<PostCardDefault> {
           style: TextStyle(fontWeight: FontWeight.bold)),
       subtitle:
           Text('${DateFormat.yMMMMEEEEd().format(_post.lastUpdate.toDate())}'),
-      trailing: _buildFollowTrailingButton(),
+      trailing: StreamBuilder<bool>(
+          initialData: false,
+          stream: _postItemBloc.isCurrentUser,
+          builder: (context, snapshot) {
+            return snapshot.data
+                ? IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.more_vert,
+                        color: Theme.of(context).primaryColor),
+                  )
+                : _buildFollowTrailingButton();
+          }),
     );
   }
 

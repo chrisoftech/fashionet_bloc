@@ -3,6 +3,7 @@ import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/consts/consts.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:libphonenumber/libphonenumber.dart';
@@ -339,19 +340,32 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         });
   }
 
-  void _showSnackbar({@required String message}) {
-    final snackbar = SnackBar(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Flexible(child: Text(message)),
-            Icon(Icons.info_outline, color: Theme.of(context).accentColor)
-          ],
-        ),
-        duration: new Duration(seconds: 2));
-    _scaffoldKey.currentState
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackbar);
+  // void _showSnackbar({@required String message}) {
+  //   final snackbar = SnackBar(
+  //       content: Row(
+  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //         children: <Widget>[
+  //           Flexible(child: Text(message)),
+  //           Icon(Icons.info_outline, color: Theme.of(context).accentColor)
+  //         ],
+  //       ),
+  //       duration: new Duration(seconds: 2));
+  //   _scaffoldKey.currentState
+  //     ..hideCurrentSnackBar()
+  //     ..showSnackBar(snackbar);
+  // }
+
+  void _showSnackbar(
+      {@required Icon icon, @required String title, @required String message}) {
+    if (!mounted) return;
+
+    Flushbar(
+      icon: icon,
+      title: title,
+      message: message,
+      flushbarStyle: FlushbarStyle.FLOATING,
+      duration: Duration(seconds: 3),
+    )..show(context);
   }
 
   Future<void> _scrollToStart() async {
@@ -363,7 +377,11 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
 
   void _submitForm() async {
     if (_images.isEmpty) {
-      _showSnackbar(message: 'Please select a profile image to continue!');
+      final _icon = Icon(Icons.warning, color: Colors.amber);
+      _showSnackbar(
+          icon: _icon,
+          title: 'Validation',
+          message: 'Please select a profile image to continue!');
       _scrollToStart();
       return;
     }
@@ -372,7 +390,11 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
         phoneNumber:
             '${_selectedCountryCode.dialCode}${_phoneNumberController.text}',
         isoCode: _selectedCountryCode.code)) {
-      _showSnackbar(message: 'Primary phone number is invalid!');
+      final _icon = Icon(Icons.warning, color: Colors.amber);
+      _showSnackbar(
+          icon: _icon,
+          title: 'Validation',
+          message: 'Primary phone number is invalid!');
       return;
     }
 
@@ -381,7 +403,11 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
           phoneNumber:
               '${_selectedCountryCode.dialCode}${_otherPhoneNumberController.text}',
           isoCode: _selectedCountryCode.code)) {
-        _showSnackbar(message: 'Other phone number is invalid!');
+        final _icon = Icon(Icons.warning, color: Colors.amber);
+        _showSnackbar(
+            icon: _icon,
+            title: 'Validation',
+            message: 'Other phone number is invalid!');
         return;
       }
     }
@@ -389,10 +415,18 @@ class _ProfileFormPageState extends State<ProfileFormPage> {
     ReturnType _isCreated = await _profileBloc.createProfile();
 
     if (!_isCreated.returnType) {
-      _showSnackbar(message: _isCreated.messagTag);
+      final _icon = Icon(Icons.error_outline, color: Colors.amber);
+      _showSnackbar(icon: _icon, title: 'Error', message: _isCreated.messagTag);
     } else {
       BlocProvider.of<ProfileVerificationBloc>(context)
         ..dispatch(VerifyProfile());
+
+      ReturnType _response = await _profileBloc.fetchCurrentUserProfile();
+      if (!_response.returnType) {
+        final _icon = Icon(Icons.error_outline, color: Colors.amber);
+        _showSnackbar(
+            icon: _icon, title: 'Error', message: _response.messagTag);
+      }
     }
   }
 

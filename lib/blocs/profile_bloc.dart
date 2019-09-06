@@ -90,6 +90,21 @@ class ProfileBloc with ProfileValidators {
     }
   }
 
+  Future<ReturnType> fetchCurrentUserProfile() async {
+    try {
+      final Profile _profile =
+          await _profileRepository.fetchProfile(isCurrentUser: true);
+      
+      _currentUserProfileController.sink.add(_profile);
+      
+      return ReturnType(
+          returnType: true, messagTag: 'User profile fetch successfully');
+    } catch (e) {
+        return ReturnType(
+          returnType: false, messagTag: 'An error occured when fetching user profile');
+    }
+  }
+
   Future<ReturnType> createProfile() async {
     try {
       _profileStateController.add(ProfileState.Loading);

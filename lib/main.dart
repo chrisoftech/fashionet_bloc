@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popup_menu/popup_menu.dart';
@@ -122,6 +124,32 @@ class AuthDecisionPage extends StatelessWidget {
 class ProfileDecisionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final ProfileBloc _profileBloc = ProfileProvider.of(context);
+
+    void _showSnackbar(
+        {@required Icon icon,
+        @required String title,
+        @required String message}) {
+      // if (!mounted) return;
+
+      Flushbar(
+        icon: icon,
+        title: title,
+        message: message,
+        flushbarStyle: FlushbarStyle.FLOATING,
+        duration: Duration(seconds: 3),
+      )..show(context);
+    }
+
+    void _fetchUserProfile() async {
+      ReturnType _response = await _profileBloc.fetchCurrentUserProfile();
+      if (!_response.returnType) {
+        final _icon = Icon(Icons.error_outline, color: Colors.amber);
+        _showSnackbar(
+            icon: _icon, title: 'Error', message: _response.messagTag);
+      }
+    }
+
     return BlocBuilder<ProfileVerificationBloc, ProfileVerificationState>(
       builder: (context, state) {
         if (state is UninitializedProfile) {
@@ -131,6 +159,8 @@ class ProfileDecisionPage extends StatelessWidget {
           return ProfileFormPage();
         }
         if (state is HasProfile) {
+          _fetchUserProfile(); // fetch current user profile
+
           return BlocProvider(
             builder: (context) => PostBloc()..onFetchPosts(),
             child: TabPage(),

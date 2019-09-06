@@ -645,7 +645,7 @@ class _PostFormState extends State<PostForm> {
     );
 
     if (_isCreated.returnType) {
-      final _icon = Icon(Icons.verified_user, color: Colors.amber);
+      final _icon = Icon(Icons.verified_user, color: Colors.green);
       _showSnackbar(
           icon: _icon, title: 'Success', message: _isCreated.messagTag);
       _resetForm();

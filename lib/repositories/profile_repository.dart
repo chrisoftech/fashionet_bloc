@@ -38,7 +38,7 @@ class ProfileRepository {
           await _profileService.hasProfile(userId: _currentUserId);
 
       final bool _hasProfile = _document.exists;
-          // _mapSnapshotToProfile(document: _document) != null;
+      // _mapSnapshotToProfile(document: _document) != null;
 
       return _hasProfile;
     } catch (e) {
@@ -46,10 +46,15 @@ class ProfileRepository {
     }
   }
 
-  Future<Profile> fetchProfile({@required String userId}) async {
+  Future<Profile> fetchProfile(
+      {String userId, bool isCurrentUser = false}) async {
     try {
+      final String _userId = !isCurrentUser
+          ? userId
+          : (await _authRepository.authenticated())?.uid;
+
       DocumentSnapshot _document =
-          await _profileService.fetchProfile(userId: userId);
+          await _profileService.fetchProfile(userId: _userId);
 
       return _mapSnapshotToProfile(document: _document);
     } catch (e) {

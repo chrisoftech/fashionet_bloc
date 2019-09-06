@@ -14,11 +14,20 @@ class PostItemBloc {
       _bookmarkedPostsController.sink.add;
 
   final _isFollowingController = BehaviorSubject<bool>();
-  Observable<bool> get isFollowing => _isFollowingController.stream.defaultIfEmpty(false);
+  Observable<bool> get isFollowing =>
+      _isFollowingController.stream.defaultIfEmpty(false);
 
   final _followingProfilesController = BehaviorSubject<List<Profile>>();
   Function(List<Profile>) get followingProfiles =>
       _followingProfilesController.sink.add;
+
+  // switch to determine if this post is by current user of the app
+  final _isCurrentUserController = BehaviorSubject<bool>();
+  Observable<bool> get isCurrentUser => _isCurrentUserController.stream;
+
+  final _currentUserProfileController = BehaviorSubject<Profile>();
+  Function(Profile) get currentUserProfile =>
+      _currentUserProfileController.sink.add;
 
   PostItemBloc({@required Post post}) {
     // verify if current post item exists in the bookmark collection
@@ -35,6 +44,14 @@ class PostItemBloc {
     }).listen((bool isFollowing) {
       _isFollowingController.sink.add(isFollowing);
     });
+
+    // verify if current post item profile is currentUser
+    _currentUserProfileController.stream
+        .map((profile) => profile.userId == post.profile.userId)
+        .listen((bool isCurrentUser) {
+      // print('IsCurrentUser $isCurrentUser');
+      _isCurrentUserController.sink.add(isCurrentUser);
+    });
   }
 
   void dispose() {
@@ -43,5 +60,8 @@ class PostItemBloc {
 
     _isFollowingController?.close();
     _followingProfilesController?.close();
+
+    _isCurrentUserController?.close();
+    _currentUserProfileController?.close();
   }
 }
