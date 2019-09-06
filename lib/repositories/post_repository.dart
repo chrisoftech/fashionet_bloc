@@ -99,6 +99,17 @@ class PostRepository {
     }
   }
 
+  Future<List<Post>> fetchProfilePosts({@required Post lastVisible, @required String userId}) async {
+    try {
+      QuerySnapshot _snapshot =
+          await _postService.fetchProfilePosts(lastVisible: lastVisible, userId: userId);
+
+      return _mapSnapshotToPosts(querySnapshot: _snapshot);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
   Future<DocumentReference> createPost(
       {@required List<Asset> assets,
       @required String title,

@@ -7,6 +7,7 @@ import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -29,6 +30,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final PanelController _panelController = PanelController();
 
+  final _scrollController = ScrollController();
+  final _scrollThreshold = 200.0;
+  ProfilePostBloc _profilePostBloc;
+
   int _currentDisplayedPageIndex = 0;
 
   Profile get _profile => widget.profile;
@@ -37,6 +42,13 @@ class _ProfilePageState extends State<ProfilePage> {
   FollowingBloc _followingBloc;
   PostProfileBloc _postProfileBloc;
   StreamSubscription _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+    _profilePostBloc = BlocProvider.of<ProfilePostBloc>(context);
+  }
 
   @override
   void didChangeDependencies() {
@@ -56,6 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void dispose() {
     _disposeBloc();
+    _scrollController.removeListener(_onScroll);
     super.dispose();
   }
 
@@ -77,6 +90,15 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void onDismiss() {
     print('Menu is closed');
+  }
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    if (maxScroll - currentScroll <= _scrollThreshold) {
+      print('Bottom loading');
+      _profilePostBloc.onFetchPosts(userId: _profile.userId);
+    }
   }
 
   void _openCustomMenu() {
@@ -274,7 +296,6 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildProfileFollowButton() {
-   
     return StreamBuilder<bool>(
         initialData: false,
         stream: _postProfileBloc.isFollowing,
@@ -384,12 +405,13 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildDynamicSliverContent() {
+  Widget _buildDynamicSliverContent({@required ProfilePostState state}) {
     Widget _dynamicSliverContent;
 
     switch (_currentDisplayedPageIndex) {
       case 0:
-        _dynamicSliverContent = TimelineTabPage(profile: _profile);
+        _dynamicSliverContent =
+            TimelineTabPage(profile: _profile, state: state);
         break;
 
       case 1:
@@ -403,7 +425,8 @@ class _ProfilePageState extends State<ProfilePage> {
         break;
 
       default:
-        _dynamicSliverContent = TimelineTabPage(profile: _profile);
+        _dynamicSliverContent =
+            TimelineTabPage(profile: _profile, state: state);
         break;
     }
 
@@ -449,13 +472,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildCustomScrollView(
       {@required double deviceHeight, @required deviceWidth}) {
-    return CustomScrollView(
-      physics: BouncingScrollPhysics(),
-      slivers: <Widget>[
-        _buildSliverAppBar(context, deviceHeight, deviceWidth),
-        _buildDynamicSliverContent(),
-      ],
-    );
+    return BlocBuilder<ProfilePostBloc, ProfilePostState>(
+        builder: (context, state) {
+      return CustomScrollView(
+        controller: _scrollController,
+        physics: BouncingScrollPhysics(),
+        slivers: <Widget>[
+          _buildSliverAppBar(context, deviceHeight, deviceWidth),
+          _buildDynamicSliverContent(state: state),
+        ],
+      );
+    });
   }
 
   Widget _buildSlideUpPanel(

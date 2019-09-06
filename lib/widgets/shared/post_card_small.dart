@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class PostCardSmall extends StatefulWidget {
@@ -19,10 +21,14 @@ class PostCardSmall extends StatefulWidget {
 
 class _PostCardSmallState extends State<PostCardSmall> {
   BookmarkBloc _bookmarkBloc;
+  ProfileBloc _profileBloc;
   PostItemBloc _postItemBloc;
+
   StreamSubscription _subscription;
+  StreamSubscription _currentUserSubscription;
 
   Post get _post => widget.post;
+  bool _isCurrentUserPost;
 
   @override
   void didChangeDependencies() {
@@ -48,24 +54,36 @@ class _PostCardSmallState extends State<PostCardSmall> {
 
   void _initBloc() {
     _bookmarkBloc = BookmarkProvider.of(context);
+    _profileBloc = ProfileProvider.of(context);
     _postItemBloc = PostItemBloc(post: _post);
 
     _subscription =
         _bookmarkBloc.bookmarkedPosts.listen(_postItemBloc.bookmarkedPosts);
+
+    _currentUserSubscription = _profileBloc.currentUserProfile
+        .listen(_postItemBloc.currentUserProfile);
   }
 
   void _disposeBloc() {
     _subscription?.cancel();
     _postItemBloc?.dispose();
+    _currentUserSubscription?.cancel();
   }
 
   void _navigateToPostDetailsPage() {
-    // Navigator.of(context).pushNamed('/bookmark/${_bookmarkPost.postId}');
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => PostDetailsPage(post: _post)));
   }
 
-  void _navigateToProfilePage() {
-    // Navigator.of(context).pushNamed(
-    // '/bookmarked-post-profile/${_bookmarkPost.postId}/${_bookmarkPost.profile.userId}');
+  void _navigateToPostUserProfile() {
+    print('IsCurrentUser $_isCurrentUserPost');
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => BlocProvider(
+            builder: (context) =>
+                ProfilePostBloc()..onFetchPosts(userId: _post.profile.userId),
+            child: ProfilePage(
+                profile: _post.profile,
+                isCurrentUserProfile: _isCurrentUserPost))));
   }
 
   Widget _buildPostPriceTag({@required BuildContext context}) {
@@ -168,7 +186,7 @@ class _PostCardSmallState extends State<PostCardSmall> {
               ),
               Expanded(
                 child: ListTile(
-                  onTap: () => _navigateToProfilePage(),
+                  onTap: () => _navigateToPostUserProfile(),
                   title: Text(
                       'by ${_post.profile.firstName} ${_post.profile.lastName}'),
                   subtitle: Text(
@@ -242,7 +260,7 @@ class _PostCardSmallState extends State<PostCardSmall> {
                     color: Colors.transparent,
                     borderRadius: BorderRadius.circular(25.0),
                     child: InkWell(
-                      onTap: () => _navigateToProfilePage(),
+                      onTap: () => _navigateToPostUserProfile(),
                       borderRadius: BorderRadius.circular(25.0),
                       child: Container(
                         height: 50.0,
@@ -355,23 +373,29 @@ class _PostCardSmallState extends State<PostCardSmall> {
         ? 500.0
         : _deviceWidth * 0.90; // 90% of total device width.
 
-    return Column(
-      children: <Widget>[
-        Material(
-          child: InkWell(
-            onTap: () => _navigateToPostDetailsPage(),
-            child: Container(
-              height: _containerHeight,
-              width: _containerWidth,
-              child: _buildCardStack(
-                  context: context,
-                  deviceWidth: _deviceWidth,
-                  containerHeight: _containerHeight),
-            ),
-          ),
-        ),
-        SizedBox(height: 5.0),
-      ],
-    );
+    return StreamBuilder<bool>(
+        initialData: false,
+        stream: _postItemBloc.isCurrentUser,
+        builder: (context, snapshot) {
+          _isCurrentUserPost = snapshot.data; // if this post is by current user
+          return Column(
+            children: <Widget>[
+              Material(
+                child: InkWell(
+                  onTap: () => _navigateToPostDetailsPage(),
+                  child: Container(
+                    height: _containerHeight,
+                    width: _containerWidth,
+                    child: _buildCardStack(
+                        context: context,
+                        deviceWidth: _deviceWidth,
+                        containerHeight: _containerHeight),
+                  ),
+                ),
+              ),
+              SizedBox(height: 5.0),
+            ],
+          );
+        });
   }
 }

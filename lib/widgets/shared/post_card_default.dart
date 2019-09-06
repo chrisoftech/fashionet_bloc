@@ -8,12 +8,14 @@ import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 class PostCardDefault extends StatefulWidget {
   final Post post;
+  final bool isProfilePost;
 
-  const PostCardDefault({Key key, @required this.post}) : super(key: key);
+  const PostCardDefault({Key key, @required this.post, this.isProfilePost = false}) : super(key: key);
 
   @override
   _PostCardDefaultState createState() => _PostCardDefaultState();
@@ -32,6 +34,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   int _currentPostImageIndex = 0;
 
   Post get _post => widget.post;
+  bool get _isProfilePost => widget.isProfilePost; // deactivate navigating to post profilepage
   bool _isCurrentUserPost;
 
   @override
@@ -81,8 +84,12 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   void _navigateToPostUserProfile() {
     print('IsCurrentUser $_isCurrentUserPost');
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => ProfilePage(
-            profile: _post.profile, isCurrentUserProfile: _isCurrentUserPost)));
+        builder: (context) => BlocProvider(
+            builder: (context) =>
+                ProfilePostBloc()..onFetchPosts(userId: _post.profile.userId),
+            child: ProfilePage(
+                profile: _post.profile,
+                isCurrentUserProfile: _isCurrentUserPost))));
   }
 
   Widget _buildActivePostImage() {
@@ -303,7 +310,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
   Widget _buildUserListTile() {
     return ListTile(
-      onTap: () => _navigateToPostUserProfile(),
+      onTap: _isProfilePost ? null : () => _navigateToPostUserProfile(),
       leading: Container(
         height: 50.0,
         width: 50.0,

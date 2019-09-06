@@ -33,6 +33,22 @@ class PostService {
             .getDocuments();
   }
 
+  Future<QuerySnapshot> fetchProfilePosts(
+      {@required Post lastVisible, @required String userId}) {
+    return lastVisible == null
+        ? _postCollection
+            .where('userId', isEqualTo: userId)
+            .orderBy('lastUpdate', descending: true)
+            .limit(2)
+            .getDocuments()
+        : _postCollection
+            .where('userId', isEqualTo: userId)
+            .orderBy('lastUpdate', descending: true)
+            .startAfter([lastVisible.lastUpdate])
+            .limit(2)
+            .getDocuments();
+  }
+
   Future<DocumentReference> createPost(
       {@required List<String> imageUrls,
       @required String userId,
