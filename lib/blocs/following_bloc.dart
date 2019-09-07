@@ -40,7 +40,10 @@ class FollowingBloc {
 
   Future<ReturnType> addToFollowing({@required Profile profile}) async {
     try {
-      _followingProfile.add(profile);
+      final List<Profile> _profiles = _followingProfile.toList();
+      _profiles.insert(0, profile);
+      
+      _followingProfile = _profiles.toSet();
       _postActionOnFollowing();
 
       await _followingRepository.addToFollowing(followingId: profile.userId);
