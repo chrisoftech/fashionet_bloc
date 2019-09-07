@@ -1,5 +1,9 @@
+import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/pages/pages.dart';
+import 'package:fashionet_bloc/transitions/transitions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CategoryLabel extends StatelessWidget {
   final Category category;
@@ -10,8 +14,18 @@ class CategoryLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void _navigateToCategoryPostsPage() {
+      final _page = BlocProvider(
+        builder: (context) =>
+            CategoryPostBloc()..onFetchPosts(categoryId: _category.categoryId),
+        child: CategoryPostPage(category: _category),
+      );
+
+      Navigator.of(context).push(SlideLeftRoute(page: _page));
+    }
+
     return InkWell(
-      onTap: () {},
+      onTap: () => _navigateToCategoryPostsPage(),
       splashColor: Colors.black54,
       borderRadius: BorderRadius.circular(20.0),
       child: Container(

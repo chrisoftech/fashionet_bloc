@@ -2,6 +2,7 @@ export 'auth_bloc.dart';
 export 'auth_verification_bloc.dart';
 export 'bookmark_bloc.dart';
 export 'category_bloc.dart';
+export 'category_post_bloc.dart';
 export 'following_bloc.dart';
 export 'login_bloc.dart';
 export 'post_bloc.dart';

@@ -99,10 +99,23 @@ class PostRepository {
     }
   }
 
-  Future<List<Post>> fetchProfilePosts({@required Post lastVisible, @required String userId}) async {
+  Future<List<Post>> fetchProfilePosts(
+      {@required Post lastVisible, @required String userId}) async {
     try {
-      QuerySnapshot _snapshot =
-          await _postService.fetchProfilePosts(lastVisible: lastVisible, userId: userId);
+      QuerySnapshot _snapshot = await _postService.fetchProfilePosts(
+          lastVisible: lastVisible, userId: userId);
+
+      return _mapSnapshotToPosts(querySnapshot: _snapshot);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<List<Post>> fetchCategoryPosts(
+      {@required Post lastVisible, @required String categoryId}) async {
+    try {
+      QuerySnapshot _snapshot = await _postService.fetchCategoryPosts(
+          lastVisible: lastVisible, categoryId: categoryId);
 
       return _mapSnapshotToPosts(querySnapshot: _snapshot);
     } catch (e) {

@@ -49,6 +49,22 @@ class PostService {
             .getDocuments();
   }
 
+  Future<QuerySnapshot> fetchCategoryPosts(
+      {@required Post lastVisible, @required String categoryId}) {
+    return lastVisible == null
+        ? _postCollection
+            .where('categories', arrayContains: categoryId)
+            .orderBy('lastUpdate', descending: true)
+            .limit(2)
+            .getDocuments()
+        : _postCollection
+            .where('categories', arrayContains: categoryId)
+            .orderBy('lastUpdate', descending: true)
+            .startAfter([lastVisible.lastUpdate])
+            .limit(2)
+            .getDocuments();
+  }
+
   Future<DocumentReference> createPost(
       {@required List<String> imageUrls,
       @required String userId,
