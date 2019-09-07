@@ -12,7 +12,9 @@ class FollowingBloc {
   Observable<List<Profile>> get followingProfiles =>
       _followingProfilesController.stream;
 
-  FollowingBloc() : _followingRepository = FollowingRepository();
+  FollowingBloc() : _followingRepository = FollowingRepository() {
+    fetchFollowing();
+  }
 
   void _postActionOnFollowing() {
     _followingProfilesController.sink.add(_followingProfile.toList());
@@ -23,6 +25,8 @@ class FollowingBloc {
       final List<Profile> _profiles =
           await _followingRepository.fetchFollowing();
       _followingProfile.addAll(_profiles);
+
+      // print('Following count ${_profiles.length}');
       _postActionOnFollowing();
 
       return ReturnType(

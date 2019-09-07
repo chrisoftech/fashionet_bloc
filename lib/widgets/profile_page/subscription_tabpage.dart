@@ -1,70 +1,19 @@
-// import 'package:fashionet_bloc/widgets/shared/shared.dart';
-// import 'package:flutter/material.dart';
-// import 'package:provider/provider.dart';
-
-// class SubscriptionTabPage extends StatelessWidget {
-//   final bool isRefreshing;
-
-//   const SubscriptionTabPage({Key key, @required this.isRefreshing}) : super(key: key);
-
-//   bool get _isRefreshing => isRefreshing;
-
-//   Widget _buildSliverList({@required ProfileBloc profileBloc}) {
-//     return SliverList(
-//       delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-//         return FollowerCard(
-//             profile: profileBloc.profileSubscriptions[index]);
-//       }, childCount: profileBloc.profileSubscriptions.length),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer<ProfileBloc>(
-//         builder: (BuildContext context, ProfileBloc profileBloc, Widget child) {
-//       return
-//       _isRefreshing ? _buildSliverList(profileBloc: profileBloc) :
-//       profileBloc.profileSubscriptionState == ProfileState.Loading
-//           ? SliverToBoxAdapter(
-//               child: Column(
-//                 children: <Widget>[
-//                   SizedBox(height: 50.0),
-//                   _isRefreshing ? Container() : CircularProgressIndicator(),
-//                 ],
-//               ),
-//             )
-//           : profileBloc.profileSubscriptions.length == 0
-//               ? SliverToBoxAdapter(
-//                   child: Column(
-//                     children: <Widget>[
-//                       SizedBox(height: 50.0),
-//                       FlatButton(
-//                         child: Row(
-//                           mainAxisAlignment: MainAxisAlignment.center,
-//                           mainAxisSize: MainAxisSize.min,
-//                           children: <Widget>[
-//                             Icon(Icons.refresh),
-//                             Text('refresh'),
-//                           ],
-//                         ),
-//                         onPressed: () {
-//                           profileBloc.fetchUserProfileSubscriptions();
-//                         },
-//                       ),
-//                       Text('Sorry! You are not subsribed to any page :('),
-//                     ],
-//                   ),
-//                 )
-//               : _buildSliverList(profileBloc: profileBloc);
-//     });
-//   }
-// }
-
+import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
+import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
 
 class SubscriptionTabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final FollowingBloc _followingBloc = FollowingProvider.of(context);
+
+    Widget _buildLoadingIndicator() {
+      return SliverFillRemaining(
+          child: Center(child: CircularProgressIndicator(strokeWidth: 2.0)));
+    }
+
     Widget _buildNoSubscriptions() {
       final double _deviceWidth = MediaQuery.of(context).size.width;
       final double _contentMaxWidth =
@@ -94,7 +43,7 @@ class SubscriptionTabPage extends StatelessWidget {
                 padding: EdgeInsets.symmetric(
                     vertical: 10.0, horizontal: _contentPadding),
                 child: Text(
-                  'You can always find your subscriptions here',
+                  'You are yet to subscribe/follow your favorite posts',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.display1.copyWith(
                       color: Theme.of(context).primaryColor, fontSize: 15.0),
@@ -106,6 +55,35 @@ class SubscriptionTabPage extends StatelessWidget {
       );
     }
 
-    return _buildNoSubscriptions();
+    Widget _buildSliverList({@required List<Profile> profiles}) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              index == 0 ? SizedBox(height: 10.0) : Container(),
+              FollowerCard(profile: profiles[index]),
+              index == profiles.length - 1
+                  ? SizedBox(height: 40.0)
+                  : SizedBox(height: 10.0),
+            ],
+          );
+        }, childCount: profiles.length),
+      );
+    }
+
+    return StreamBuilder<List<Profile>>(
+        stream: _followingBloc.followingProfiles,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return _buildLoadingIndicator();
+          }
+
+          final List<Profile> _profiles = snapshot.data;
+
+          return _profiles == null || _profiles.length == 0
+              ? _buildNoSubscriptions()
+              : _buildSliverList(profiles: _profiles);
+        });
   }
 }
