@@ -44,7 +44,7 @@ class _CategoryPostPageState extends State<CategoryPostPage> {
 
   Widget _buildAppBarLeading() {
     return IconButton(
-        onPressed: () {},
+        onPressed: () => Navigator.of(context).pop(),
         icon: Icon(
           Icons.arrow_back,
         ),
