@@ -76,7 +76,6 @@ class _PostCardSmallState extends State<PostCardSmall> {
   }
 
   void _navigateToPostUserProfile() {
-    print('IsCurrentUser $_isCurrentUserPost');
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => BlocProvider(
             builder: (context) =>

@@ -3,15 +3,20 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
+import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FollowerCard extends StatefulWidget {
   final Profile profile;
+  final bool showControl;
 
-  const FollowerCard({Key key, @required this.profile}) : super(key: key);
+  const FollowerCard(
+      {Key key, @required this.profile, this.showControl = true})
+      : super(key: key);
 
   @override
   _FollowerCardState createState() => _FollowerCardState();
@@ -23,6 +28,7 @@ class _FollowerCardState extends State<FollowerCard> {
   StreamSubscription _subscription;
 
   Profile get _profile => widget.profile;
+  bool get _showControl => widget.showControl;
 
   @override
   void didUpdateWidget(FollowerCard oldWidget) {
@@ -58,7 +64,12 @@ class _FollowerCardState extends State<FollowerCard> {
   }
 
   void _navigateToProfilePage() {
-    Navigator.of(context).pushNamed('/subscribed-profile/${_profile.userId}');
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => BlocProvider(
+            builder: (context) =>
+                ProfilePostBloc()..onFetchPosts(userId: _profile.userId),
+            child:
+                ProfilePage(profile: _profile, isCurrentUserProfile: false))));
   }
 
   void _showSnackbar(
@@ -159,7 +170,9 @@ class _FollowerCardState extends State<FollowerCard> {
           )),
         ],
       ),
-      trailing: _buildUnfollowButton(),
+      trailing: !_showControl
+          ? Container(height: 20.0, width: 20.0)
+          : _buildUnfollowButton(),
     );
   }
 

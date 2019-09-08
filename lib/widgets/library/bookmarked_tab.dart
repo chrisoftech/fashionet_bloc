@@ -9,13 +9,13 @@ class BookmarkedTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final BookmarkBloc _bookmarkBloc = BookmarkProvider.of(context);
 
-    final double _deviceWidth = MediaQuery.of(context).size.width;
-    final double _contentMaxWidth =
-        _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .80;
-
-    final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
-
     Widget _buildNoBookmarks() {
+      final double _deviceWidth = MediaQuery.of(context).size.width;
+      final double _contentMaxWidth =
+          _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .80;
+
+      final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+
       return Container(
         alignment: Alignment(0.0, 0.0),
         child: Column(

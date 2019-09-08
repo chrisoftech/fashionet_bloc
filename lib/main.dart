@@ -40,7 +40,8 @@ void main() {
             child: FollowingProvider(
               child: BookmarkProvider(
                   child: CategoryProvider(
-                      child: LatestPostProvider(child: MyApp()))),
+                      child: FollowersProvider(
+                          child: LatestPostProvider(child: MyApp())))),
             ),
           ),
         ),
@@ -60,6 +61,7 @@ class _MyAppState extends State<MyApp> {
   PostFormBloc _postFormBloc;
   BookmarkBloc _bookmarkBloc;
   CategoryBloc _categoryBloc;
+  FollowersBloc _followersBloc;
   LatestPostBloc _latestPostBloc;
 
   @override
@@ -70,6 +72,7 @@ class _MyAppState extends State<MyApp> {
     _postFormBloc = PostFormProvider.of(context);
     _bookmarkBloc = BookmarkProvider.of(context);
     _categoryBloc = CategoryProvider.of(context);
+    _followersBloc = FollowersProvider.of(context);
     _latestPostBloc = LatestPostProvider.of(context);
   }
 
@@ -81,9 +84,10 @@ class _MyAppState extends State<MyApp> {
     _postFormBloc.dispose();
     _bookmarkBloc.dispose();
     _categoryBloc.dispose();
+    _followersBloc.dispose();
     _latestPostBloc.dispose();
 
-    print('Main.dart is disposed');
+    // print('Main.dart is disposed');
   }
 
   @override

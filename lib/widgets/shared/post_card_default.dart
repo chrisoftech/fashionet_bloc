@@ -85,7 +85,6 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   }
 
   void _navigateToPostUserProfile() {
-    print('IsCurrentUser $_isCurrentUserPost');
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => BlocProvider(
             builder: (context) =>

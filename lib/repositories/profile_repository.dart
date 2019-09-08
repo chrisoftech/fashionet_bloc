@@ -62,7 +62,7 @@ class ProfileRepository {
     }
   }
 
-  Future<List<String>> fetchUserFollowing({String userId}) async {
+  Future<List<String>> fetchUserFollowing() async {
     try {
       final String _userId = (await _authRepository.authenticated())?.uid;
 
@@ -78,6 +78,30 @@ class ProfileRepository {
       }
 
       return _followingProfileIds;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<List<Profile>> fetchUserFollowers() async {
+    try {
+      final String _userId = (await _authRepository.authenticated())?.uid;
+
+      QuerySnapshot _snapshot =
+          await _profileService.fetchUserFollowers(userId: _userId);
+
+      print('Followers count ${_snapshot.documents.length}');
+
+      final List<Profile> _followersProfile = [];
+
+      for (var document in _snapshot.documents) {
+        final String _documentId = document.documentID;
+
+        final Profile _profile = await fetchProfile(userId: _documentId);
+        _followersProfile.add(_profile);
+      }
+
+      return _followersProfile;
     } catch (e) {
       throw (e);
     }

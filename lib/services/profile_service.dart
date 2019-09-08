@@ -24,6 +24,13 @@ class ProfileService {
         .getDocuments();
   }
 
+  Future<QuerySnapshot> fetchUserFollowers({@required String userId}) {
+    return _profileCollection
+        .document(userId)
+        .collection('followers')
+        .getDocuments();
+  }
+
   Future<void> createProfile(
       {@required String userId,
       @required String firstname,

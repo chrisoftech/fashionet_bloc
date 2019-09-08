@@ -131,36 +131,34 @@ class _HomeTabState extends State<HomeTab> {
 
     final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
 
-    return SliverFillRemaining(
-      child: Container(
-        alignment: Alignment(0.0, 0.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.new_releases,
-              size: 70.0,
-              color: Theme.of(context).primaryColor,
-            ),
-            Text(
-              'You currently don\'t have any latest posts',
+    return Container(
+      alignment: Alignment(0.0, 0.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            Icons.new_releases,
+            size: 70.0,
+            color: Theme.of(context).primaryColor,
+          ),
+          Text(
+            'You don\'t have any latest posts',
+            style: Theme.of(context).textTheme.display1.copyWith(
+                color: Theme.of(context).primaryColor,
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+                vertical: 10.0, horizontal: _contentPadding),
+            child: Text(
+              'You can easily find all subscribed users latest posts here',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.display1.copyWith(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold),
+                  color: Theme.of(context).primaryColor, fontSize: 15.0),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(
-                  vertical: 10.0, horizontal: _contentPadding),
-              child: Text(
-                'You can easily find all subscribed users latest posts here',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.display1.copyWith(
-                    color: Theme.of(context).primaryColor, fontSize: 15.0),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
