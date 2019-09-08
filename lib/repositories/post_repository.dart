@@ -123,6 +123,32 @@ class PostRepository {
     }
   }
 
+  Future<List<Post>> fetchLatestPosts() async {
+    try {
+      final List<String> _followingProfileIds =
+          await _profileRepository.fetchUserFollowing();
+
+      final List<Post> _latestPosts = [];
+
+      for (var userId in _followingProfileIds) {
+        final QuerySnapshot _snapshot =
+            await _postService.fetchLatestPosts(userId: userId);
+
+        final List<Post> _posts =
+            await _mapSnapshotToPosts(querySnapshot: _snapshot);
+        _latestPosts.add(_posts[0]);
+      }
+
+      // sort posts by lastUdate (decending order)
+      _latestPosts.sort(
+          (b, a) => a.lastUpdate.toDate().compareTo(b.lastUpdate.toDate()));
+
+      return _latestPosts;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
   Future<DocumentReference> createPost(
       {@required List<Asset> assets,
       @required String title,

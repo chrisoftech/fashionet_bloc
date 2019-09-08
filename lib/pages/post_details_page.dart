@@ -25,28 +25,11 @@ class _PostDetailsPageState extends State<PostDetailsPage> {
 
   int _currentPostImageIndex = 0;
 
-  // bool _isCurrentUserProfile = false;
   BookmarkBloc _bookmarkBloc;
   PostItemBloc _postItemBloc;
   StreamSubscription _subscription;
 
   Post get _post => widget.post;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // final ProfileBloc _profileBloc =
-    //     Provider.of<ProfileBloc>(context, listen: false);
-
-    // if (_profileBloc.userProfile != null) {
-    //   setState(() {
-    //     _profileBloc.userProfile.userId == _post.profile.userId
-    //         ? _isCurrentUserProfile = true
-    //         : _isCurrentUserProfile = false;
-    //   });
-    // }
-  }
 
   @override
   void didChangeDependencies() {

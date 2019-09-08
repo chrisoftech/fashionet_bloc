@@ -57,7 +57,7 @@ class PostFormBloc {
       print(e.toString());
 
       _postStateController.sink.add(PostFormState.Failure);
-      return ReturnType(returnType: true, messagTag: e.toString());
+      return ReturnType(returnType: false, messagTag: e.toString());
     }
   }
 

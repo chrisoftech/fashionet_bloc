@@ -1,5 +1,7 @@
 import 'package:fashionet_bloc/blocs/blocs.dart';
+import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
+import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/transitions/transitions.dart';
 import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +17,18 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
+  LatestPostBloc _latestPostBloc;
+
   ScrollController get _scrollController => widget.scrollController;
 
   GlobalKey _menuButtonKey = GlobalKey();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _latestPostBloc = LatestPostProvider.of(context);
+  }
 
   void _onClickMenu(MenuItemProvider item) {
     if (item.menuTitle == 'Categories') {
@@ -113,31 +124,86 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildLatestPosts() {
-    return SliverToBoxAdapter(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildSectionLabel(label: 'Latest Posts'),
-          Container(
-            height: 260.0,
-            child: ListView.builder(
-              itemCount: 10,
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (contex, index) {
-                return Row(
-                  children: <Widget>[
-                    index == 0 ? SizedBox(width: 20.0) : Container(),
-                    PostCardLarge(),
-                    SizedBox(width: 10.0),
-                  ],
-                );
-              },
+  Widget _buildNoPosts() {
+    final double _deviceWidth = MediaQuery.of(context).size.width;
+    final double _contentMaxWidth =
+        _deviceWidth > 500.0 ? 500.0 : _deviceWidth * .80;
+
+    final double _contentPadding = (_deviceWidth - _contentMaxWidth) / 2;
+
+    return SliverFillRemaining(
+      child: Container(
+        alignment: Alignment(0.0, 0.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.new_releases,
+              size: 70.0,
+              color: Theme.of(context).primaryColor,
             ),
-          )
-        ],
+            Text(
+              'You currently don\'t have any latest posts',
+              style: Theme.of(context).textTheme.display1.copyWith(
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  vertical: 10.0, horizontal: _contentPadding),
+              child: Text(
+                'You can easily find all subscribed users latest posts here',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.display1.copyWith(
+                    color: Theme.of(context).primaryColor, fontSize: 15.0),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildLatestPosts() {
+    return SliverToBoxAdapter(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        _buildSectionLabel(label: 'Latest Posts'),
+        Container(
+          height: 260.0,
+          child: StreamBuilder<List<Post>>(
+              stream: _latestPostBloc.latestPosts,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return Center(
+                      child: CircularProgressIndicator(strokeWidth: 2.0));
+                }
+
+                final List<Post> _posts = snapshot.data;
+
+                return _posts.length == 0
+                    ? _buildNoPosts()
+                    : ListView.builder(
+                        itemCount: snapshot.data.length,
+                        scrollDirection: Axis.horizontal,
+                        itemBuilder: (contex, index) {
+                          final Post _post = _posts[index];
+
+                          return Row(
+                            children: <Widget>[
+                              index == 0 ? SizedBox(width: 20.0) : Container(),
+                              PostCardLarge(post: _post),
+                              SizedBox(width: 10.0),
+                            ],
+                          );
+                        },
+                      );
+              }),
+        )
+      ],
+    ));
   }
 
   Widget _buildSuggestedPosts({@required double contentPadding}) {

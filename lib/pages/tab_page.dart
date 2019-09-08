@@ -116,7 +116,8 @@ class _TabPageState extends State<TabPage> {
         tabScrollController: _libraryTabScrollController,
       );
     }
-    return HomeTab(scrollController: _scrollController);
+    return LatestPostProvider(
+        child: HomeTab(scrollController: _scrollController));
   }
 
   Widget _floatingCollapsed() {

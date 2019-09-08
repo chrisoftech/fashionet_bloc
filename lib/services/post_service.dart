@@ -65,6 +65,14 @@ class PostService {
             .getDocuments();
   }
 
+  Future<QuerySnapshot> fetchLatestPosts({@required String userId}) {
+    return _postCollection
+        .orderBy('lastUpdate', descending: true)
+        .where('userId', isEqualTo: userId)
+        .limit(1)
+        .getDocuments();
+  }
+
   Future<DocumentReference> createPost(
       {@required List<String> imageUrls,
       @required String userId,

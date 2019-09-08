@@ -37,9 +37,12 @@ void main() {
       child: AuthProvider(
         child: ProfileProvider(
           child: PostFormProvider(
-              child: FollowingProvider(
-                  child: BookmarkProvider(
-                      child: CategoryProvider(child: MyApp())))),
+            child: FollowingProvider(
+              child: BookmarkProvider(
+                  child: CategoryProvider(
+                      child: LatestPostProvider(child: MyApp()))),
+            ),
+          ),
         ),
       ),
     ),
@@ -57,6 +60,7 @@ class _MyAppState extends State<MyApp> {
   PostFormBloc _postFormBloc;
   BookmarkBloc _bookmarkBloc;
   CategoryBloc _categoryBloc;
+  LatestPostBloc _latestPostBloc;
 
   @override
   void didChangeDependencies() {
@@ -66,6 +70,7 @@ class _MyAppState extends State<MyApp> {
     _postFormBloc = PostFormProvider.of(context);
     _bookmarkBloc = BookmarkProvider.of(context);
     _categoryBloc = CategoryProvider.of(context);
+    _latestPostBloc = LatestPostProvider.of(context);
   }
 
   @override
@@ -76,6 +81,9 @@ class _MyAppState extends State<MyApp> {
     _postFormBloc.dispose();
     _bookmarkBloc.dispose();
     _categoryBloc.dispose();
+    _latestPostBloc.dispose();
+
+    print('Main.dart is disposed');
   }
 
   @override

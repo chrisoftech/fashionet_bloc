@@ -62,6 +62,27 @@ class ProfileRepository {
     }
   }
 
+  Future<List<String>> fetchUserFollowing({String userId}) async {
+    try {
+      final String _userId = (await _authRepository.authenticated())?.uid;
+
+      QuerySnapshot _snapshot =
+          await _profileService.fetchUserFollowing(userId: _userId);
+
+      final List<String> _followingProfileIds = [];
+
+      for (var document in _snapshot.documents) {
+        final String _documentId = document.documentID;
+
+        _followingProfileIds.add(_documentId);
+      }
+
+      return _followingProfileIds;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
   Future<void> createProfile(
       {@required String firstname,
       @required String lastname,

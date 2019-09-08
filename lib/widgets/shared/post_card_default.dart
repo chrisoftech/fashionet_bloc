@@ -15,7 +15,9 @@ class PostCardDefault extends StatefulWidget {
   final Post post;
   final bool isProfilePost;
 
-  const PostCardDefault({Key key, @required this.post, this.isProfilePost = false}) : super(key: key);
+  const PostCardDefault(
+      {Key key, @required this.post, this.isProfilePost = false})
+      : super(key: key);
 
   @override
   _PostCardDefaultState createState() => _PostCardDefaultState();
@@ -34,7 +36,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   int _currentPostImageIndex = 0;
 
   Post get _post => widget.post;
-  bool get _isProfilePost => widget.isProfilePost; // deactivate navigating to post profilepage
+  bool get _isProfilePost =>
+      widget.isProfilePost; // deactivate navigating to post profilepage
   bool _isCurrentUserPost;
 
   @override
@@ -487,18 +490,5 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         SizedBox(height: 20.0)
       ],
     );
-
-    // return Card(
-    //   elevation: 5.0,
-    //   child: Container(
-    //     child: Column(
-    //       mainAxisSize: MainAxisSize.min,
-    //       children: <Widget>[
-    //         _buildPostDetails(),
-    //         _buildPostCardBackgroundImage()
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
