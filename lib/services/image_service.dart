@@ -97,11 +97,11 @@ class ImageService {
     return uploadUrls;
   }
 
-  // Future<void> deleteImage({@required String imageUrl}) async {
-  //   if (imageUrl.isNotEmpty) {
-  //     final StorageReference reference =
-  //         await FirebaseStorage.instance.getReferenceFromUrl(imageUrl);
-  //     return reference.delete();
-  //   }
-  // }
+  Future<void> deleteImage({@required String imageUrl}) async {
+    if (imageUrl.isNotEmpty) {
+      final StorageReference reference =
+          await FirebaseStorage.instance.getReferenceFromUrl(imageUrl);
+      return reference.delete();
+    }
+  }
 }

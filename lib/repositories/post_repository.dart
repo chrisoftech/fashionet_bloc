@@ -18,9 +18,18 @@ class PostRepository {
         _profileRepository = ProfileRepository();
 
   Future<List<String>> _uploadPostImage(
-      {@required String userId, @required List<Asset> assets}) async {
+      {@required String userId,
+      @required List<Asset> assets,
+      Post post}) async {
     try {
       final String _fileLocation = '$userId/posts';
+
+      // delete images
+      if (post != null && assets.isNotEmpty) {
+        for (String imageUrl in post.imageUrls) {
+          await _imageRepository.deletePostImages(imageUrl: imageUrl);
+        }
+      }
 
       final List<String> imageUrls = await _imageRepository.savePostImages(
           fileLocation: _fileLocation, assets: assets);
@@ -50,7 +59,7 @@ class PostRepository {
         price: document.data['price'],
         isAvailable: document.data['isAvailable'],
         imageUrls: document.data['imageUrls'],
-        categories: document.data['category'],
+        categories: document.data['categories'],
         created: document.data['created'],
         lastUpdate: document.data['lastUpdate'],
         profile: _postProfile,
@@ -78,7 +87,7 @@ class PostRepository {
         price: _document.data['price'],
         isAvailable: _document.data['isAvailable'],
         imageUrls: _document.data['imageUrls'],
-        categories: _document.data['category'],
+        categories: _document.data['categories'],
         created: _document.data['created'],
         lastUpdate: _document.data['lastUpdate'],
         profile: _postProfile,
@@ -165,6 +174,40 @@ class PostRepository {
 
       return _postService.createPost(
           imageUrls: _imageUrls,
+          userId: _currentUserId,
+          title: title,
+          description: description,
+          price: price,
+          isAvailable: isAvailable,
+          categories: categories);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<void> updatePost(
+      {@required List<Asset> assets,
+      @required String postId,
+      @required String title,
+      @required String description,
+      @required double price,
+      @required bool isAvailable,
+      @required List<String> categories}) async {
+    try {
+      final String _currentUserId =
+          (await _authRepository.authenticated())?.uid;
+
+      final List<String> _imageUrls = [];
+      if (assets.isNotEmpty) {
+        final List<String> _urls =
+            await _uploadPostImage(userId: _currentUserId, assets: assets);
+
+        _imageUrls..addAll(_urls);
+      }
+
+      return _postService.updatePost(
+          imageUrls: _imageUrls,
+          postId: postId,
           userId: _currentUserId,
           title: title,
           description: description,

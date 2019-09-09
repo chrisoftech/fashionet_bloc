@@ -32,4 +32,14 @@ class ImageRepository {
       throw (e);
     }
   }
+
+  Future<void> deletePostImages({@required String imageUrl}) async {
+    try {
+      await _imageService.deleteImage(imageUrl: imageUrl);
+
+      return;
+    } catch (e) {
+      throw (e);
+    }
+  }
 }

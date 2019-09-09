@@ -3,6 +3,7 @@ export 'categories_page.dart';
 export 'category_post_page.dart';
 export 'home_page.dart';
 export 'post_details_page.dart';
+export 'post_edit_page.dart';
 export 'profile_form_page.dart';
 export 'profile_page.dart';
 export 'splash_page.dart';

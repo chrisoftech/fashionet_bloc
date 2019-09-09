@@ -1,14 +1,19 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keyboard_avoider/keyboard_avoider.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class PostForm extends StatefulWidget {
- 
+  final Post post;
+
+  const PostForm({Key key, this.post}) : super(key: key);
+
   @override
   _PostFormState createState() => _PostFormState();
 }
@@ -35,12 +40,37 @@ class _PostFormState extends State<PostForm> {
   List<Asset> _images = List<Asset>();
   String _error = 'No Error Dectected';
 
+  Post get _post => widget.post;
+  PostFormState _postFormState = PostFormState.Default;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // initialize form if post exists
+    if (_post != null) {
+      _titleController.text = _post.title;
+      _descriptionController.text = _post.description;
+      _priceController.text = _post.price.toString();
+      _isItemAvailable = _post.isAvailable;
+      _availabilityController.text = _isItemAvailable ? 'YES' : 'NO';
+
+      _selectedCategories.addAll(Iterable.castFrom(_post.categories));
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     _categoryBloc = CategoryProvider.of(context);
     _postFormBloc = PostFormProvider.of(context);
+  }
+
+  void _onWidgetDidBuild(Function callback) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callback();
+    });
   }
 
   void _hideKeyPad() {
@@ -111,9 +141,9 @@ class _PostFormState extends State<PostForm> {
   Widget _buildPostImageCarouselIndicator() {
     List<Widget> dots = [];
 
-    final int _imageCount = _images.length;
-    // final int _imageCount =
-    //     _images.isEmpty ? _post.imageUrls.length : _images.length;
+    // final int _imageCount = _images.length;
+    final int _imageCount =
+        _images.isEmpty ? _post.imageUrls.length : _images.length;
 
     for (int i = 0; i < _imageCount; i++) {
       dots.add(i == _currentPostImageIndex
@@ -141,52 +171,50 @@ class _PostFormState extends State<PostForm> {
             _currentPostImageIndex = index;
           });
         },
-        items:
-            // _images.isEmpty
-            //     ? _post.imageUrls.map((dynamic postImageUrl) {
-            //         return Builder(
-            //           builder: (BuildContext context) {
-            //             return CachedNetworkImage(
-            //               imageUrl: '${postImageUrl.toString()}',
-            //               placeholder: (context, imageUrl) => Center(
-            //                   child: CircularProgressIndicator(strokeWidth: 2.0)),
-            //               errorWidget: (context, imageUrl, error) =>
-            //                   Center(child: Icon(Icons.error)),
-            //               imageBuilder:
-            //                   (BuildContext context, ImageProvider image) {
-            //                 return Hero(
-            //                   tag: '${_post.postId}_${_post.imageUrls[0]}',
-            //                   child: Stack(
-            //                     children: <Widget>[
-            //                       Container(
-            //                         decoration: BoxDecoration(
-            //                           image: DecorationImage(
-            //                               image: image, fit: BoxFit.cover),
-            //                         ),
-            //                       ),
-            //                       Container(
-            //                           decoration:
-            //                               BoxDecoration(color: Colors.black12)),
-            //                     ],
-            //                   ),
-            //                 );
-            //               },
-            //             );
-            //           },
-            //         );
-            //       }).toList()
-            //     :
-            _images.map((Asset asset) {
-          return Builder(
-            builder: (BuildContext context) {
-              return AssetThumb(
-                asset: asset,
-                width: 300,
-                height: 300,
-              );
-            },
-          );
-        }).toList());
+        items: _images.isEmpty
+            ? _post.imageUrls.map((dynamic postImageUrl) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return CachedNetworkImage(
+                      imageUrl: '${postImageUrl.toString()}',
+                      placeholder: (context, imageUrl) => Center(
+                          child: CircularProgressIndicator(strokeWidth: 2.0)),
+                      errorWidget: (context, imageUrl, error) =>
+                          Center(child: Icon(Icons.error)),
+                      imageBuilder:
+                          (BuildContext context, ImageProvider image) {
+                        return Hero(
+                          tag: '${_post.postId}_${_post.imageUrls[0]}',
+                          child: Stack(
+                            children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image: image, fit: BoxFit.cover),
+                                ),
+                              ),
+                              Container(
+                                  decoration:
+                                      BoxDecoration(color: Colors.black12)),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+              }).toList()
+            : _images.map((Asset asset) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return AssetThumb(
+                      asset: asset,
+                      width: 300,
+                      height: 300,
+                    );
+                  },
+                );
+              }).toList());
   }
 
   Widget _buildPostCardBackgroundImage() {
@@ -194,10 +222,11 @@ class _PostFormState extends State<PostForm> {
       alignment: Alignment.center,
       children: <Widget>[
         Container(child: _buildPostImageCarousel()),
-        // _images.isEmpty && _post.imageUrls.length > 1
-        //     ? _buildPostImageCarouselIndicator()
-        //     :
-        _images.length > 1 ? _buildPostImageCarouselIndicator() : Container(),
+        _images.isEmpty && _post.imageUrls.length > 1
+            ? _buildPostImageCarouselIndicator()
+            : _images.length > 1
+                ? _buildPostImageCarouselIndicator()
+                : Container(),
       ],
     );
   }
@@ -220,9 +249,9 @@ class _PostFormState extends State<PostForm> {
                 children: <Widget>[
                   InkWell(
                     borderRadius: BorderRadius.circular(50.0),
-                    onTap:
-                        // !_isSavePostFABEnabled ? null :
-                        () => _loadAssets(),
+                    onTap: _postFormState == PostFormState.Loading
+                        ? null
+                        : () => _loadAssets(),
                     child: Container(
                       padding: EdgeInsets.all(10.0),
                       decoration: BoxDecoration(
@@ -253,20 +282,16 @@ class _PostFormState extends State<PostForm> {
               width: _deviceWidth,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: Colors.black54),
-              child:
-                  //  _post != null
-                  //     ? _buildPostCardBackgroundImage()
-                  //     :
-                  _images.isNotEmpty
+              child: _post != null
+                  ? _buildPostCardBackgroundImage()
+                  : _images.isNotEmpty
                       ? _buildPostCardBackgroundImage()
                       : InkWell(
                           splashColor: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(50.0),
-                          onTap:
-                              //  !_isSavePostFABEnabled
-                              //     ? null
-                              //     :
-                              () => _loadAssets(),
+                          onTap: _postFormState == PostFormState.Loading
+                              ? null
+                              : () => _loadAssets(),
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: Icon(
@@ -358,6 +383,13 @@ class _PostFormState extends State<PostForm> {
   }
 
   Widget _buildIsProductAvailableFormField() {
+    if (_post != null) {
+      setState(() {
+        _isItemAvailable = _post.isAvailable;
+        _availabilityController.text = _isItemAvailable ? 'YES' : 'NO';
+      });
+    }
+
     return Stack(
       children: <Widget>[
         InkWell(
@@ -475,7 +507,7 @@ class _PostFormState extends State<PostForm> {
                               });
                             } else {
                               // check if number of list items == 4 (MaxCategoriesAllowed)
-                              if (_selectedCategories.length == 4) {
+                              if (_selectedCategories.length >= 4) {
                                 final _icon =
                                     Icon(Icons.warning, color: Colors.amber);
                                 _showSnackbar(
@@ -612,15 +644,17 @@ class _PostFormState extends State<PostForm> {
 
   Future<void> _submitForm() async {
     _hideKeyPad();
-    if (_images.isEmpty) {
-      final _icon = Icon(Icons.warning, color: Colors.amber);
-      _showSnackbar(
-          icon: _icon,
-          title: 'Validation',
-          message: 'Please select post image(s) to continue!');
+    if (_post == null) {
+      if (_images.isEmpty) {
+        final _icon = Icon(Icons.warning, color: Colors.amber);
+        _showSnackbar(
+            icon: _icon,
+            title: 'Validation',
+            message: 'Please select post image(s) to continue!');
 
-      _scrollToStart();
-      return;
+        _scrollToStart();
+        return;
+      }
     }
 
     if (!_formKey.currentState.validate()) {
@@ -633,24 +667,39 @@ class _PostFormState extends State<PostForm> {
       return;
     }
 
-    final ReturnType _isCreated = await _postFormBloc.createPost(
-      assets: _images,
-      title: _titleController.text,
-      description: _descriptionController.text,
-      price: _priceController.text.isEmpty
-          ? 0.0
-          : double.parse(_priceController.text),
-      isAvailable: _isItemAvailable,
-      categories: _selectedCategories,
-    );
+    final ReturnType _isCreated = _post != null
+        ? await _postFormBloc.updatePost(
+            assets: _images,
+            postId: _post.postId,
+            title: _titleController.text,
+            description: _descriptionController.text,
+            price: _priceController.text.isEmpty
+                ? 0.0
+                : double.parse(_priceController.text),
+            isAvailable: _isItemAvailable,
+            categories: _selectedCategories,
+          )
+        : await _postFormBloc.createPost(
+            assets: _images,
+            title: _titleController.text,
+            description: _descriptionController.text,
+            price: _priceController.text.isEmpty
+                ? 0.0
+                : double.parse(_priceController.text),
+            isAvailable: _isItemAvailable,
+            categories: _selectedCategories,
+          );
 
     if (_isCreated.returnType) {
       final _icon = Icon(Icons.verified_user, color: Colors.green);
       _showSnackbar(
           icon: _icon, title: 'Success', message: _isCreated.messagTag);
-      _resetForm();
 
-      // BlocProvider.of<PostBloc>(context)..dispatch(FetchPosts());
+      if (_post == null) {
+        _resetForm();
+      } else {
+        _scrollToStart();
+      }
     } else {
       final _icon = Icon(Icons.error_outline, color: Colors.red);
       _showSnackbar(icon: _icon, title: 'Error', message: _isCreated.messagTag);
@@ -663,6 +712,10 @@ class _PostFormState extends State<PostForm> {
         builder: (context, snapshot) {
           final double _buttonWidth =
               snapshot.data == PostFormState.Loading ? 50.0 : 150.0;
+          // setState(() => _postFormState = snapshot.data);
+          _onWidgetDidBuild(() {
+            _postFormState = snapshot.data;
+          });
 
           return Align(
             alignment: Alignment.bottomCenter,
@@ -745,9 +798,9 @@ class _PostFormState extends State<PostForm> {
               children: <Widget>[
                 Expanded(
                   child: FlatButton(
-                    onPressed:
-                        // !_isSavePostFABEnabled ? null :
-                        () => _loadAssets(),
+                    onPressed: _postFormState == PostFormState.Loading
+                        ? null
+                        : () => _loadAssets(),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[

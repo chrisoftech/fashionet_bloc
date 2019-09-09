@@ -6,6 +6,7 @@ import 'package:fashionet_bloc/blocs/blocs.dart';
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
+import 'package:fashionet_bloc/transitions/transitions.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -216,7 +217,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
       alignment: Alignment.center,
       children: <Widget>[
         Container(
-          child: _post.imageUrls.length > 0
+          child: _post.imageUrls != null && _post.imageUrls.length > 0
               ? _buildPostImageCarousel()
               : Image.asset('assets/avatars/bg-avatar.png', fit: BoxFit.cover),
         ),
@@ -310,6 +311,33 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         });
   }
 
+  void _onSelectOption(dynamic value) {
+    if (value == 'EDIT') {
+      final _page = PostEditPage(post: _post);
+
+      Navigator.of(context).push(SlideLeftRoute(page: _page));
+    }
+  }
+
+  Widget _buildPopUpMenu() {
+    return PopupMenuButton(
+      icon: Icon(Icons.more_vert),
+      itemBuilder: (context) {
+        return <PopupMenuItem>[
+          PopupMenuItem(
+            child: Text('Edit'),
+            value: 'EDIT',
+          ),
+          PopupMenuItem(
+            child: Text('Delete'),
+            value: 'DELETE',
+          ),
+        ];
+      },
+      onSelected: _onSelectOption,
+    );
+  }
+
   Widget _buildUserListTile() {
     return ListTile(
       onTap: _isProfilePost ? null : () => _navigateToPostUserProfile(),
@@ -354,11 +382,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
             _isCurrentUserPost =
                 snapshot.data; // if this post is by current user
             return snapshot.data
-                ? IconButton(
-                    onPressed: () {},
-                    icon: Icon(Icons.more_vert,
-                        color: Theme.of(context).primaryColor),
-                  )
+                ? _buildPopUpMenu()
                 : _buildFollowTrailingButton();
           }),
     );

@@ -24,12 +24,12 @@ class PostService {
     return lastVisible == null
         ? _postCollection
             .orderBy('lastUpdate', descending: true)
-            .limit(2)
+            .limit(5)
             .getDocuments()
         : _postCollection
             .orderBy('lastUpdate', descending: true)
             .startAfter([lastVisible.lastUpdate])
-            .limit(2)
+            .limit(5)
             .getDocuments();
   }
 
@@ -39,13 +39,13 @@ class PostService {
         ? _postCollection
             .where('userId', isEqualTo: userId)
             .orderBy('lastUpdate', descending: true)
-            .limit(2)
+            .limit(5)
             .getDocuments()
         : _postCollection
             .where('userId', isEqualTo: userId)
             .orderBy('lastUpdate', descending: true)
             .startAfter([lastVisible.lastUpdate])
-            .limit(2)
+            .limit(5)
             .getDocuments();
   }
 
@@ -55,13 +55,13 @@ class PostService {
         ? _postCollection
             .where('categories', arrayContains: categoryId)
             .orderBy('lastUpdate', descending: true)
-            .limit(2)
+            .limit(5)
             .getDocuments()
         : _postCollection
             .where('categories', arrayContains: categoryId)
             .orderBy('lastUpdate', descending: true)
             .startAfter([lastVisible.lastUpdate])
-            .limit(2)
+            .limit(5)
             .getDocuments();
   }
 
@@ -92,5 +92,36 @@ class PostService {
       'created': _serverTimestamp,
       'lastUpdate': _serverTimestamp,
     });
+  }
+
+  Future<void> updatePost(
+      {@required List<String> imageUrls,
+      @required String postId,
+      @required String userId,
+      @required String title,
+      @required String description,
+      @required double price,
+      @required bool isAvailable,
+      @required List<String> categories}) {
+    return imageUrls.isEmpty
+        ? _postCollection.document(postId).setData({
+            'userId': userId,
+            'title': title,
+            'description': description,
+            'price': price,
+            'isAvailable': isAvailable,
+            'categories': categories,
+            'lastUpdate': _serverTimestamp,
+          }, merge: true)
+        : _postCollection.document(postId).setData({
+            'imageUrls': imageUrls,
+            'userId': userId,
+            'title': title,
+            'description': description,
+            'price': price,
+            'isAvailable': isAvailable,
+            'categories': categories,
+            'lastUpdate': _serverTimestamp,
+          }, merge: true);
   }
 }

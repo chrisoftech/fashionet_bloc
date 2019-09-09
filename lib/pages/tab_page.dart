@@ -4,6 +4,7 @@ import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/widgets/widgets.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class TabPage extends StatefulWidget {
@@ -109,7 +110,10 @@ class _TabPageState extends State<TabPage> {
 
   Widget _buildTabBody() {
     if (_activeTabIndex == 1) {
-      return ExploreTab(scrollController: _scrollController);
+      return BlocProvider(
+        builder: (context) => PostBloc()..onFetchPosts(),
+        child: ExploreTab(scrollController: _scrollController),
+      );
     } else if (_activeTabIndex == 2) {
       return LibraryTab(
         scrollController: _scrollController,
@@ -189,7 +193,7 @@ class _TabPageState extends State<TabPage> {
         },
         activeTabIndex: _activeTabIndex,
       ),
-      floatingActionButton: _builScrollToTopFAB(),
+      // floatingActionButton: _builScrollToTopFAB(),
       // floatingActionButton: _scrollToTopExtent() ? _builScrollToTopFAB() : null,
 
       body: SafeArea(

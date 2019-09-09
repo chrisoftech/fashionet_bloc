@@ -173,10 +173,7 @@ class ProfileDecisionPage extends StatelessWidget {
         if (state is HasProfile) {
           _fetchUserProfile(); // fetch current user profile
 
-          return BlocProvider(
-            builder: (context) => PostBloc()..onFetchPosts(),
-            child: TabPage(),
-          );
+          return TabPage();
         }
 
         return SplashPage();

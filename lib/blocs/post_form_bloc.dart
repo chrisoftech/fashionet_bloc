@@ -61,6 +61,39 @@ class PostFormBloc {
     }
   }
 
+  Future<ReturnType> updatePost(
+      {@required List<Asset> assets,
+      @required String postId,
+      @required String title,
+      @required String description,
+      @required double price,
+      @required bool isAvailable,
+      @required List<String> categories}) async {
+    try {
+      _postStateController.sink.add(PostFormState.Loading);
+
+      await _postRepository.updatePost(
+        assets: assets,
+        postId: postId,
+        title: title,
+        description: description,
+        price: price,
+        isAvailable: isAvailable,
+        categories: categories,
+      );
+      // await Future.delayed(Duration(seconds: 5));
+
+      _postStateController.sink.add(PostFormState.Success);
+
+      return ReturnType(returnType: true, messagTag: 'Ad updated successfully');
+    } catch (e) {
+      print(e.toString());
+
+      _postStateController.sink.add(PostFormState.Failure);
+      return ReturnType(returnType: false, messagTag: e.toString());
+    }
+  }
+
   void dispose() {
     _postStateController?.close();
     // _postsController?.close();
