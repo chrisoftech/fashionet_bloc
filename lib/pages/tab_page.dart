@@ -26,6 +26,8 @@ class _TabPageState extends State<TabPage> {
   final PageController _pageController = PageController();
   PageView _pageView;
 
+  PostFormBloc _postFormBloc;
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +40,7 @@ class _TabPageState extends State<TabPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    _postFormBloc = PostFormProvider.of(context);
     // _bookmarkBloc = BookmarkProvider.of(context);
   }
 
@@ -156,7 +159,7 @@ class _TabPageState extends State<TabPage> {
           ]),
       child: Container(
         margin: EdgeInsets.only(top: 25.0),
-        child: PostForm(),
+        child: PostForm(key: _postFormBloc.uniqueKey),
       ),
     );
   }

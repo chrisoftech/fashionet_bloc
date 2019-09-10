@@ -1,5 +1,6 @@
 import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/repositories/repositories.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:rxdart/rxdart.dart';
@@ -9,27 +10,19 @@ enum PostFormState { Default, Loading, Success, Failure }
 class PostFormBloc {
   final PostRepository _postRepository;
 
+  static UniqueKey _uniqueKey;
+
   final _postStateController = BehaviorSubject<PostFormState>();
   Observable<PostFormState> get postFormState =>
       _postStateController.stream.defaultIfEmpty(PostFormState.Default);
 
-  // // List of all posts
-  // final _postsController = BehaviorSubject<List<Post>>();
-  // Observable<List<Post>> get posts => _postsController.stream;
-
   PostFormBloc() : _postRepository = PostRepository();
 
-  // Future<ReturnType> fetchPosts() async {
-  //   try {
-  //     final List<Post> _posts = await _postRepository.fetchPosts();
-  //     _postsController.sink.add(_posts);
-
-  //     return ReturnType(
-  //         returnType: true, messagTag: 'Posts loaded successfully');
-  //   } catch (e) {
-  //     return ReturnType(returnType: true, messagTag: e.toString());
-  //   }
-  // }
+  // set post-form unique key
+  UniqueKey get uniqueKey => _uniqueKey;
+  setUniqueKey({@required UniqueKey uniqueKey}) {
+    _uniqueKey = uniqueKey;
+  }
 
   Future<ReturnType> createPost(
       {@required List<Asset> assets,

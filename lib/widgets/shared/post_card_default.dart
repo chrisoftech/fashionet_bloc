@@ -91,13 +91,19 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   }
 
   void _navigateToPostUserProfile() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => BlocProvider(
-            builder: (context) =>
-                ProfilePostBloc()..onFetchPosts(userId: _post.profile.userId),
-            child: ProfilePage(
-                profile: _post.profile,
-                isCurrentUserProfile: _isCurrentUserPost))));
+    Navigator.of(context)
+        .push(MaterialPageRoute(
+      builder: (context) => BlocProvider(
+          builder: (context) =>
+              ProfilePostBloc()..onFetchPosts(userId: _post.profile.userId),
+          child: ProfilePage(
+              profile: _post.profile,
+              isCurrentUserProfile: _isCurrentUserPost)),
+    ))
+        .then((_) {
+      final _uniqueKey = UniqueKey(); // reset post-state
+      _postFormBloc.setUniqueKey(uniqueKey: _uniqueKey);
+    });
   }
 
   Widget _buildActivePostImage() {
@@ -316,32 +322,6 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         });
   }
 
-// void _showSnackbar(
-//       {@required Icon icon, @required String title, @required String message}) {
-//     if (!mounted) return;
-
-//     Flushbar(
-//       icon: icon,
-//       title: title,
-//       message: message,
-//       flushbarStyle: FlushbarStyle.FLOATING,
-//       duration: Duration(seconds: 3),
-//     )..show(context);
-//   }
-
-  Future<void> _deletePost() async {
-    final ReturnType _response = await _postFormBloc.deletePost(post: _post);
-    if (_response.returnType) {
-      final _icon = Icon(Icons.verified_user, color: Colors.green);
-      _showSnackbar(
-          icon: _icon, title: 'Success', message: _response.messagTag);
-      Navigator.of(context).pop();
-    } else {
-      final _icon = Icon(Icons.error_outline, color: Colors.red);
-      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
-    }
-  }
-
   void _buildDeleteConfirmationDialog() async {
     showDialog(
         barrierDismissible: false,
@@ -361,7 +341,10 @@ class _PostCardDefaultState extends State<PostCardDefault> {
     if (value == 'EDIT') {
       final _page = PostEditPage(post: _post);
 
-      Navigator.of(context).push(SlideLeftRoute(page: _page));
+      Navigator.of(context).push(SlideLeftRoute(page: _page)).then((_) {
+        final _uniqueKey = UniqueKey(); // reset post-state
+        _postFormBloc.setUniqueKey(uniqueKey: _uniqueKey);
+      });
     } else {
       _buildDeleteConfirmationDialog();
     }
