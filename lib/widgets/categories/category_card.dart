@@ -42,6 +42,7 @@ class _CategoryCardState extends State<CategoryCard> {
   void _openDeleteConfirmationDialog() {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return CategoryDeleteDialog(category: _category);
         }).then((_) {

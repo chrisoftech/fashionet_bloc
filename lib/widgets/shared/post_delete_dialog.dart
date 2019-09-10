@@ -4,30 +4,31 @@ import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
-class CategoryDeleteDialog extends StatefulWidget {
-  final Category category;
+class PostDeleteDialog extends StatefulWidget {
+  final Post post;
 
-  const CategoryDeleteDialog({Key key, @required this.category})
-      : super(key: key);
+  const PostDeleteDialog({Key key, @required this.post}) : super(key: key);
 
   @override
-  _CategoryDeleteDialogState createState() => _CategoryDeleteDialogState();
+  _PostDeleteDialogState createState() => _PostDeleteDialogState();
 }
 
-class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
-  CategoryBloc _categoryBloc;
-  Category get _category => widget.category;
+class _PostDeleteDialogState extends State<PostDeleteDialog> {
+  PostFormBloc _postFormBloc;
+  BookmarkBloc _bookmarkBloc;
+  Post get _post => widget.post;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _categoryBloc = CategoryProvider.of(context);
+    _postFormBloc = PostFormProvider.of(context);
+    _bookmarkBloc = BookmarkProvider.of(context);
   }
 
   Widget _buildDialogIcon() {
     return Icon(
-      Icons.info_outline,
+      Icons.delete_outline,
       color: Colors.black12,
       size: 80.0,
     );
@@ -59,11 +60,12 @@ class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
     )..show(context);
   }
 
-  void deleteCategory() async {
-    final ReturnType _isDeleted =
-        await _categoryBloc.deleteCategory(categoryId: _category.categoryId);
+  void deletePost() async {
+    final ReturnType _isDeleted = await _postFormBloc.deletePost(post: _post);
 
     if (_isDeleted.returnType) {
+      // _bookmarkBloc.fetchBookmarks();
+      await _bookmarkBloc.removeFromBookmarks(post: _post);
       Navigator.pop(context, true);
     } else {
       final _icon = Icon(Icons.error_outline, color: Colors.red);
@@ -73,19 +75,19 @@ class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
   }
 
   Widget _buidlDeleteButton() {
-    return StreamBuilder<CategoryState>(
-        stream: _categoryBloc.categoryFormState,
+    return StreamBuilder<PostFormState>(
+        stream: _postFormBloc.postFormState,
         builder: (context, snapshot) {
           return Flexible(
             child: RaisedButton(
-              onPressed: snapshot.data == CategoryState.Loading
+              onPressed: snapshot.data == PostFormState.Loading
                   ? null
-                  : () => deleteCategory(),
+                  : () => deletePost(),
               color: Theme.of(context).primaryColor,
               textColor: Theme.of(context).accentColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0)),
-              child: snapshot.data == CategoryState.Loading
+              child: snapshot.data == PostFormState.Loading
                   ? SizedBox(
                       height: 20.0,
                       width: 20.0,
@@ -113,8 +115,9 @@ class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
       padding: EdgeInsets.only(
         top: 30.0,
       ),
+      // width: 400.0,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -127,7 +130,7 @@ class _CategoryDeleteDialogState extends State<CategoryDeleteDialog> {
                       fontWeight: FontWeight.bold)),
               SizedBox(height: 10.0),
               Text('Are you sure of deleting'),
-              Text('${_category.title}?',
+              Text('${_post.title}?',
                   style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),

@@ -48,4 +48,28 @@ class BookmarkService {
         .document(postId)
         .delete();
   }
+
+  Future<void> deletePostBookmarks({@required String postId}) async {
+    try {
+      // get all profileId that bookmarked this post
+      final QuerySnapshot _snapshot = await _postCollection
+          .document(postId)
+          .collection('bookmarks')
+          .getDocuments();
+
+      for (var document in _snapshot.documents) {
+        final String _documentId = document.documentID;
+
+        await _profileCollection
+            .document(_documentId)
+            .collection('bookmarks')
+            .document(postId)
+            .delete();
+      }
+
+      return;
+    } catch (e) {
+      throw (e);
+    }
+  }
 }

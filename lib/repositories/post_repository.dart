@@ -10,12 +10,16 @@ class PostRepository {
   final AuthRepository _authRepository;
   final ImageRepository _imageRepository;
   final ProfileRepository _profileRepository;
+  // final BookmarkRepository _bookmarRepository;
+  final BookmarkService _bookmarkService;
 
   PostRepository()
       : _postService = PostService(),
         _authRepository = AuthRepository(),
         _imageRepository = ImageRepository(),
-        _profileRepository = ProfileRepository();
+        _profileRepository = ProfileRepository(),
+        // _bookmarRepository = BookmarkRepository();
+        _bookmarkService = BookmarkService();
 
   Future<List<String>> _uploadPostImage(
       {@required String userId,
@@ -36,6 +40,16 @@ class PostRepository {
 
       print('Image uploaded ${imageUrls.toList()}');
       return imageUrls;
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<void> _deletePostImage({@required Post post}) async {
+    try {
+      for (String imageUrl in post.imageUrls) {
+        await _imageRepository.deletePostImages(imageUrl: imageUrl);
+      }
     } catch (e) {
       throw (e);
     }
@@ -214,6 +228,16 @@ class PostRepository {
           price: price,
           isAvailable: isAvailable,
           categories: categories);
+    } catch (e) {
+      throw (e);
+    }
+  }
+
+  Future<void> deletePost({@required Post post}) async {
+    try {
+      await _deletePostImage(post: post);
+      await _bookmarkService.deletePostBookmarks(postId: post.postId);
+      return _postService.deletePost(postId: post.postId);
     } catch (e) {
       throw (e);
     }

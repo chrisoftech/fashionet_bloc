@@ -7,6 +7,7 @@ import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:fashionet_bloc/providers/providers.dart';
 import 'package:fashionet_bloc/transitions/transitions.dart';
+import 'package:fashionet_bloc/widgets/shared/shared.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,6 +30,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   FollowingBloc _followingBloc;
   ProfileBloc _profileBloc;
   PostItemBloc _postItemBloc;
+
+  PostFormBloc _postFormBloc;
 
   StreamSubscription _bookmarkSubscription;
   StreamSubscription _followingSubscription;
@@ -76,6 +79,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
 
     _currentUserSubscription = _profileBloc.currentUserProfile
         .listen(_postItemBloc.currentUserProfile);
+
+    _postFormBloc = PostFormProvider.of(context);
   }
 
   void _disposeBloc() {
@@ -311,11 +316,54 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         });
   }
 
+// void _showSnackbar(
+//       {@required Icon icon, @required String title, @required String message}) {
+//     if (!mounted) return;
+
+//     Flushbar(
+//       icon: icon,
+//       title: title,
+//       message: message,
+//       flushbarStyle: FlushbarStyle.FLOATING,
+//       duration: Duration(seconds: 3),
+//     )..show(context);
+//   }
+
+  Future<void> _deletePost() async {
+    final ReturnType _response = await _postFormBloc.deletePost(post: _post);
+    if (_response.returnType) {
+      final _icon = Icon(Icons.verified_user, color: Colors.green);
+      _showSnackbar(
+          icon: _icon, title: 'Success', message: _response.messagTag);
+      Navigator.of(context).pop();
+    } else {
+      final _icon = Icon(Icons.error_outline, color: Colors.red);
+      _showSnackbar(icon: _icon, title: 'Error', message: _response.messagTag);
+    }
+  }
+
+  void _buildDeleteConfirmationDialog() async {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return PostDeleteDialog(post: _post);
+        }).then((_) {
+      if (_ != null && _) {
+        final _icon = Icon(Icons.verified_user, color: Colors.green);
+        final _deleteMessage = 'Post deleted successfully';
+        _showSnackbar(icon: _icon, title: 'Success', message: _deleteMessage);
+      }
+    });
+  }
+
   void _onSelectOption(dynamic value) {
     if (value == 'EDIT') {
       final _page = PostEditPage(post: _post);
 
       Navigator.of(context).push(SlideLeftRoute(page: _page));
+    } else {
+      _buildDeleteConfirmationDialog();
     }
   }
 
@@ -387,44 +435,6 @@ class _PostCardDefaultState extends State<PostCardDefault> {
           }),
     );
   }
-
-  //  Future<void> _deletePost() async {
-  //   final bool _isDeleted = await _postBloc.deletePost(post: _post);
-  //   if (_isDeleted) {
-  //     // _showMessageSnackBar(
-  //     //     content: '${_post.title} is deleted sucessfully',
-  //     //     icon: Icons.check,
-  //     //     isError: false);
-  //     Navigator.of(context).pop();
-  //   } else {
-  //     _showMessageSnackBar(
-  //         content: 'Sorry! Something went wrong! Try again',
-  //         icon: Icons.error_outline,
-  //         isError: true);
-  //   }
-  // }
-
-  // void _buildDeleteConfirmationDialog() async {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: Text('Delete Post',
-  //               style: TextStyle(fontWeight: FontWeight.bold)),
-  //           content: Text('Are you sure of deleting ${_post.title}?'),
-  //           actions: <Widget>[
-  //             FlatButton(
-  //               onPressed: () => Navigator.of(context).pop(),
-  //               child: Text('Cancel'),
-  //             ),
-  //             RaisedButton(
-  //               onPressed: () {},
-  //               child: Text('Delete'),
-  //             )
-  //           ],
-  //         );
-  //       });
-  // }
 
   void _toggleBookmarkStatus({@required AsyncSnapshot<bool> snapshot}) async {
     ReturnType _response = !snapshot.data

@@ -94,6 +94,24 @@ class PostFormBloc {
     }
   }
 
+  Future<ReturnType> deletePost({@required Post post}) async {
+    try {
+      _postStateController.sink.add(PostFormState.Loading);
+
+      await _postRepository.deletePost(post: post);
+      // await Future.delayed(Duration(seconds: 5));
+
+      _postStateController.sink.add(PostFormState.Success);
+
+      return ReturnType(returnType: true, messagTag: 'Ad deleted successfully');
+    } catch (e) {
+      print(e.toString());
+
+      _postStateController.sink.add(PostFormState.Failure);
+      return ReturnType(returnType: false, messagTag: e.toString());
+    }
+  }
+
   void dispose() {
     _postStateController?.close();
     // _postsController?.close();

@@ -124,4 +124,8 @@ class PostService {
             'lastUpdate': _serverTimestamp,
           }, merge: true);
   }
+
+  Future<void> deletePost({@required String postId}) {
+    return _postCollection.document(postId).delete();
+  }
 }

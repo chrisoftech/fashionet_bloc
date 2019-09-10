@@ -11,24 +11,25 @@ class BookmarkRepository {
 
   BookmarkRepository()
       : _bookmarkService = BookmarkService(),
-        _authRepository = AuthRepository(), _postRepository= PostRepository();
-
+        _authRepository = AuthRepository(),
+        _postRepository = PostRepository();
 
   Future<List<Post>> fetchBookmarks() async {
     final String _currentUserId = (await _authRepository.authenticated())?.uid;
 
-    final QuerySnapshot _snapshot = await _bookmarkService.fetchBookmarks(userId: _currentUserId);
+    final QuerySnapshot _snapshot =
+        await _bookmarkService.fetchBookmarks(userId: _currentUserId);
 
     final List<Post> _posts = [];
 
     for (var document in _snapshot.documents) {
       final String _postId = document.documentID;
 
-     final Post _post = await _postRepository.fetchPost(postId: _postId);
+      final Post _post = await _postRepository.fetchPost(postId: _postId);
 
-     _posts.add(_post);
+      _posts.add(_post);
     }
-    
+
     return _posts;
   }
 
@@ -55,4 +56,12 @@ class BookmarkRepository {
       throw (e);
     }
   }
+
+  // Future<void> deletePostBookmarks({@required String postId}) async {
+  //   try {
+  //     return _bookmarkService.deletePostBookmarks(postId: postId);
+  //   } catch(e) {
+  //     throw(e);
+  //   }
+  // }
 }
