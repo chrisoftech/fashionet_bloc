@@ -3,6 +3,7 @@ import 'package:fashionet_bloc/models/models.dart';
 import 'package:fashionet_bloc/pages/pages.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:popup_menu/popup_menu.dart';
 
@@ -31,17 +32,19 @@ class SimpleBlocDelegate extends BlocDelegate {
 
 void main() {
   BlocSupervisor.delegate = SimpleBlocDelegate();
-  runApp(
-    BlocProvider(
-      builder: (context) => AuthVerificationBloc()..dispatch(AppStarted()),
-      child: AuthProvider(
-        child: ProfileProvider(
-          child: PostFormProvider(
-            child: FollowingProvider(
-              child: BookmarkProvider(
-                  child: CategoryProvider(
-                      child: FollowersProvider(
-                          child: LatestPostProvider(child: MyApp())))),
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
+    (_) => runApp(
+      BlocProvider(
+        builder: (context) => AuthVerificationBloc()..dispatch(AppStarted()),
+        child: AuthProvider(
+          child: ProfileProvider(
+            child: PostFormProvider(
+              child: FollowingProvider(
+                child: BookmarkProvider(
+                    child: CategoryProvider(
+                        child: FollowersProvider(
+                            child: LatestPostProvider(child: MyApp())))),
+              ),
             ),
           ),
         ),

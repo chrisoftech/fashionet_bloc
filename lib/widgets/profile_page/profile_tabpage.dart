@@ -40,16 +40,13 @@ class ProfileTabPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final double _deviceWidth = MediaQuery.of(context).size.width;
 
-    final double _contentWidthPadding =
-        _deviceWidth > 450.0 ? _deviceWidth - 450.0 : 30.0;
+    final double _contentWidth = _deviceWidth > 500.0 ? 500.0 : _deviceWidth;
 
     return SliverToBoxAdapter(
       child: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.symmetric(
-            vertical: 20.0,
-            horizontal: _contentWidthPadding,
-          ),
+          width: _contentWidth,
+          padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
