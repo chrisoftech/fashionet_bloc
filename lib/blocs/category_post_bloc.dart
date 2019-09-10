@@ -49,11 +49,12 @@ abstract class CategoryPostEvent extends Equatable {
 
 class CategoryFetchPosts extends CategoryPostEvent {
   final String categoryId;
+  final bool isRefresh;
 
-  CategoryFetchPosts({@required this.categoryId}) : super([categoryId]);
+  CategoryFetchPosts({@required this.categoryId, @required this.isRefresh}) : super([categoryId, isRefresh]);
 
   @override
-  String toString() => 'CategoryFetchPosts { $categoryId }';
+  String toString() => 'CategoryFetchPosts { categoryId: $categoryId, isRefresh: $isRefresh }';
 }
 
 // Post Bloc
@@ -78,14 +79,27 @@ class CategoryPostBloc extends Bloc<CategoryPostEvent, CategoryPostState> {
   @override
   CategoryPostState get initialState => CategoryPostUninitialized();
 
-  void onFetchPosts({@required String categoryId}) {
-    dispatch(CategoryFetchPosts(categoryId: categoryId));
+  void onFetchPosts({@required String categoryId, bool isRefresh = false}) {
+    dispatch(CategoryFetchPosts(categoryId: categoryId, isRefresh: isRefresh));
   }
 
   @override
   Stream<CategoryPostState> mapEventToState(CategoryPostEvent event) async* {
     bool _hasReachedMax(CategoryPostState state) =>
         state is CategoryPostLoaded && state.hasReachedMax;
+
+    if (event is CategoryFetchPosts && event.isRefresh) {
+      try {
+        List<Post> posts = await _postRepository.fetchCategoryPosts(
+            lastVisible: null, categoryId: event.categoryId);
+
+        yield CategoryPostLoaded(posts: posts, hasReachedMax: false);
+        return;
+      } catch (e) {
+        print(e.toString());
+        yield CategoryPostError(error: e.toString());
+      }
+    }
 
     if (event is CategoryFetchPosts && !_hasReachedMax(currentState)) {
       try {

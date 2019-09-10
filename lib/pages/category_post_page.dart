@@ -243,7 +243,8 @@ class _CategoryPostPageState extends State<CategoryPostPage> {
         delegate: SliverChildBuilderDelegate((context, index) {
           return index >= state.posts.length
               ? BottomLoader()
-              : PostCardDefault(post: _posts[index]);
+              : PostCardDefault(
+                  post: _posts[index], categoryId: _category.categoryId);
         },
             childCount: state.hasReachedMax
                 ? state.posts.length

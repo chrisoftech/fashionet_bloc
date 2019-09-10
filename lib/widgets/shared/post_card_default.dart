@@ -15,10 +15,14 @@ import 'package:intl/intl.dart';
 
 class PostCardDefault extends StatefulWidget {
   final Post post;
+  final String categoryId;
   final bool isProfilePost;
 
   const PostCardDefault(
-      {Key key, @required this.post, this.isProfilePost = false})
+      {Key key,
+      @required this.post,
+      this.categoryId,
+      this.isProfilePost = false})
       : super(key: key);
 
   @override
@@ -40,6 +44,7 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   int _currentPostImageIndex = 0;
 
   Post get _post => widget.post;
+  String get _categoryId => widget.categoryId;
   bool get _isProfilePost =>
       widget.isProfilePost; // deactivate navigating to post profilepage
   bool _isCurrentUserPost;
@@ -325,6 +330,10 @@ class _PostCardDefaultState extends State<PostCardDefault> {
   void _refreshFetchedPosts() {
     // refresh fetched posts
     BlocProvider.of<PostBloc>(context)..onFetchPosts(isRefresh: true);
+    if (_categoryId != null && _categoryId.isNotEmpty) {
+      BlocProvider.of<CategoryPostBloc>(context)
+        ..onFetchPosts(categoryId: _categoryId, isRefresh: true);
+    }
   }
 
   void _buildDeleteConfirmationDialog() async {
