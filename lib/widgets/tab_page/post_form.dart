@@ -695,6 +695,9 @@ class _PostFormState extends State<PostForm> {
       _showSnackbar(
           icon: _icon, title: 'Success', message: _isCreated.messagTag);
 
+      // refresh fetched posts
+      BlocProvider.of<PostBloc>(context)..onFetchPosts(isRefresh: true);
+
       if (_post == null) {
         _resetForm();
       } else {

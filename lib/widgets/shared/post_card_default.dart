@@ -322,6 +322,11 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         });
   }
 
+  void _refreshFetchedPosts() {
+    // refresh fetched posts
+    BlocProvider.of<PostBloc>(context)..onFetchPosts(isRefresh: true);
+  }
+
   void _buildDeleteConfirmationDialog() async {
     showDialog(
         barrierDismissible: false,
@@ -333,6 +338,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
         final _icon = Icon(Icons.verified_user, color: Colors.green);
         final _deleteMessage = 'Post deleted successfully';
         _showSnackbar(icon: _icon, title: 'Success', message: _deleteMessage);
+
+        _refreshFetchedPosts();
       }
     });
   }
@@ -344,6 +351,8 @@ class _PostCardDefaultState extends State<PostCardDefault> {
       Navigator.of(context).push(SlideLeftRoute(page: _page)).then((_) {
         final _uniqueKey = UniqueKey(); // reset post-state
         _postFormBloc.setUniqueKey(uniqueKey: _uniqueKey);
+
+        _refreshFetchedPosts();
       });
     } else {
       _buildDeleteConfirmationDialog();

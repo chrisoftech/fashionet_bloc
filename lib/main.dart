@@ -43,7 +43,11 @@ void main() {
                 child: BookmarkProvider(
                     child: CategoryProvider(
                         child: FollowersProvider(
-                            child: LatestPostProvider(child: MyApp())))),
+                            child: LatestPostProvider(
+                                child: BlocProvider(
+                                    builder: (context) =>
+                                        PostBloc()..onFetchPosts(),
+                                    child: MyApp()))))),
               ),
             ),
           ),

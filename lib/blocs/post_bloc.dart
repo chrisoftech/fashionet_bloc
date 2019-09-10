@@ -43,11 +43,17 @@ class PostError extends PostState {
 }
 
 // Post Events
-abstract class PostEvent extends Equatable {}
+abstract class PostEvent extends Equatable {
+  PostEvent([List props = const []]) : super(props);
+}
 
 class FetchPosts extends PostEvent {
+  final bool isRefresh;
+
+  FetchPosts({this.isRefresh}) : super([isRefresh]);
+
   @override
-  String toString() => 'FetchPosts';
+  String toString() => 'FetchPosts { isRefresh: $isRefresh }';
 }
 
 // Post Bloc
@@ -72,8 +78,8 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   @override
   PostState get initialState => PostUninitialized();
 
-  void onFetchPosts() {
-    dispatch(FetchPosts());
+  void onFetchPosts({bool isRefresh = false}) {
+    dispatch(FetchPosts(isRefresh: isRefresh));
   }
 
   @override
@@ -81,14 +87,25 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     bool _hasReachedMax(PostState state) =>
         state is PostLoaded && state.hasReachedMax;
 
+    if (event is FetchPosts && event.isRefresh) {
+      try {
+        List<Post> posts = await _postRepository.fetchPosts(lastVisible: null);
+
+        yield PostLoaded(posts: posts, hasReachedMax: false);
+        return;
+      } catch (e) {
+        print(e.toString());
+        yield PostError(error: e.toString());
+      }
+    }
+
     if (event is FetchPosts && !_hasReachedMax(currentState)) {
       try {
         if (currentState is PostUninitialized) {
-          List<Post> posts = await _postRepository.fetchPosts(lastVisible: null);
+          List<Post> posts =
+              await _postRepository.fetchPosts(lastVisible: null);
 
-
-          yield PostLoaded(
-              posts: posts,  hasReachedMax: false);
+          yield PostLoaded(posts: posts, hasReachedMax: false);
           return;
         }
 
@@ -99,7 +116,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
           List<Post> posts =
               await _postRepository.fetchPosts(lastVisible: lastVisible);
-
 
           yield posts.isEmpty
               ? (currentState as PostLoaded).copyWith(hasReachedMax: true)

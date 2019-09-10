@@ -113,10 +113,8 @@ class _TabPageState extends State<TabPage> {
 
   Widget _buildTabBody() {
     if (_activeTabIndex == 1) {
-      return BlocProvider(
-        builder: (context) => PostBloc()..onFetchPosts(),
-        child: ExploreTab(scrollController: _scrollController),
-      );
+      BlocProvider.of<PostBloc>(context)..onFetchPosts(isRefresh: true);
+      return ExploreTab(scrollController: _scrollController);
     } else if (_activeTabIndex == 2) {
       return LibraryTab(
         scrollController: _scrollController,
