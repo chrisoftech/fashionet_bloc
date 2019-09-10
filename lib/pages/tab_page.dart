@@ -162,6 +162,41 @@ class _TabPageState extends State<TabPage> {
     );
   }
 
+  Future<bool> _showExitAlertDialog() {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Close Application'),
+            content: Text('Are you sure of exiting FASHIONet?'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              RaisedButton(
+                  child: Text('Exit'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  }),
+            ],
+          );
+        });
+  }
+
+  Future<bool> _onWillPop() async {
+    if (_panelController.isPanelOpen()) {
+      _panelController.close();
+      // _menu.dismiss();
+      return false;
+    } else {
+      // _menu.dismiss();
+      return _showExitAlertDialog();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _pageView = PageView(
@@ -181,32 +216,35 @@ class _TabPageState extends State<TabPage> {
       ],
     );
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      resizeToAvoidBottomInset: false,
-      bottomNavigationBar: BottomTab(
-        onActiveTabChanged: (int index) {
-          setState(() {
-            _activeTabIndex = index;
-            // _pageController.animateToPage(index,
-            //     duration: Duration(milliseconds: 500), curve: Curves.ease);
-          });
-        },
-        activeTabIndex: _activeTabIndex,
-      ),
-      // floatingActionButton: _builScrollToTopFAB(),
-      // floatingActionButton: _scrollToTopExtent() ? _builScrollToTopFAB() : null,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: BottomTab(
+          onActiveTabChanged: (int index) {
+            setState(() {
+              _activeTabIndex = index;
+              // _pageController.animateToPage(index,
+              //     duration: Duration(milliseconds: 500), curve: Curves.ease);
+            });
+          },
+          activeTabIndex: _activeTabIndex,
+        ),
+        // floatingActionButton: _builScrollToTopFAB(),
+        // floatingActionButton: _scrollToTopExtent() ? _builScrollToTopFAB() : null,
 
-      body: SafeArea(
-        child: SlidingUpPanel(
-          minHeight: 50.0,
-          renderPanelSheet: false,
-          controller: _panelController,
-          panel: _floatingPanel(),
-          collapsed: _floatingCollapsed(),
-          body: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            child: _buildTabBody(),
+        body: SafeArea(
+          child: SlidingUpPanel(
+            minHeight: 50.0,
+            renderPanelSheet: false,
+            controller: _panelController,
+            panel: _floatingPanel(),
+            collapsed: _floatingCollapsed(),
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 500),
+              child: _buildTabBody(),
+            ),
           ),
         ),
       ),
